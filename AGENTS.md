@@ -61,10 +61,11 @@ repository. Report what a check printed, not what it should print.
 | Rule | Mechanism |
 |------|-----------|
 | Push to `main` only via PR; merge commits only; no force-push or deletion of `main` | GitHub ruleset `adp-ruleset` |
-| Commit format, anchor resolves, no attribution lines | `scripts/hooks/commit-msg`; CI (planned) |
+| Commit format, anchor resolves, no attribution lines | `scripts/hooks/commit-msg`; CI job `commits` |
 | No push to `main`, no force-push, no remote deletion (local guardrail) | `scripts/hooks/pre-push` |
-| `DEFECTS.md` append-only | CI (planned) |
-| `schema/` changes need an ACCEPTED proposal | CI (planned) |
+| Schemas pass the metaschema; examples validate | CI job `schema` |
+| `schema/` changes need an ACCEPTED proposal | CI job `schema` (`scripts/ci/check-schema-gate`) |
+| `DEFECTS.md` append-only, IDs sequential, fields valid | CI job `defects` |
 | Everything else | Review by the maintainer |
 
 Inherits the eng-principles change-control practice (ENG-STD-005).

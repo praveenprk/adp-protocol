@@ -1,0 +1,29 @@
+#!/bin/sh
+# check-commits — run scripts/hooks/commit-msg on every non-merge commit
+# in BASE..HEAD. Hooks are local and can be skipped; this is the same
+# check, run where it cannot be skipped.
+# Usage: scripts/ci/check-commits BASE [HEAD]
+# Anchors resolve against the checked-out tree (HEAD).
+# Substrate: POSIX sh, git, mktemp. Exit: 0 all accepted, 1 any refused.
+# Quiet on success.
+
+set -u
+
+[ $# -ge 1 ] || { printf 'usage: check-commits BASE [HEAD]\n' >&2; exit 2; }
+base=$1
+head=${2:-HEAD}
+
+hooks=$(cd "$(dirname "$0")/../hooks" && pwd -P) || exit 2
+msg=$(mktemp) || exit 2
+trap 'rm -f "$msg"' EXIT INT TERM
+
+failed=0
+for c in $(git rev-list --no-merges --reverse "$base..$head"); do
+    git log -1 --format=%B "$c" > "$msg"
+    if ! out=$(sh "$hooks/commit-msg" "$msg" 2>&1); then
+        printf '%s %s\n%s\n' "$(git rev-parse --short "$c")" "$(git log -1 --format=%s "$c")" "$out" >&2
+        failed=1
+    fi
+done
+
+exit "$failed"
