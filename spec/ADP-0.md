@@ -65,7 +65,7 @@ Every file in the repository belongs to exactly one class.
 |                 | `conformance/` vectors                      |         |
 | **Informative** | Sections of `spec/ADP-N.md` whose heading   | No      |
 |                 | carries the suffix `(Informative)`;         |         |
-|                 | `examples/`; `README.md`; `CONTRIBUTING.md` |         |
+|                 | `examples/`; `README.md`; `AGENTS.md`       |         |
 | **Process**     | `spec/ADP-0.md`; `DEFECTS.md`;              | On the  |
 |                 | `proposals/`                                | process |
 | **Record**      | `experiments/`                              | No      |
@@ -316,7 +316,7 @@ adp-protocol/
 ├── experiments/          # records (§3.3)
 ├── DEFECTS.md            # defect register
 ├── README.md             # informative
-├── CONTRIBUTING.md       # informative
+├── AGENTS.md             # informative (repo rules)
 └── LICENSE
 ```
 
@@ -325,7 +325,7 @@ adp-protocol/
 ## 10. What ADP-0 Is Not
 
 - Not a contribution guide. Workflow for pull requests, commit
-  message format, and code style belong in `CONTRIBUTING.md`.
+  message format, and code style belong in `AGENTS.md`.
 - Not a code of conduct.
 - Not part of the protocol. An envelope's conformance never depends
   on ADP-0.
@@ -347,3 +347,6 @@ adp-protocol/
 |            | classified informative; unlisted files default  |
 |            | to Informative (§3.4); highest applicable       |
 |            | severity wins (§4.4); layout updated (§9).      |
+| 2026-11-15 | Pre-adoption revision: repository rules file is |
+|            | `AGENTS.md`, replacing `CONTRIBUTING.md` (§3,   |
+|            | §9, §10).                                       |
