@@ -65,9 +65,10 @@ Every file in the repository belongs to exactly one class.
 |                 | `conformance/` vectors                      |         |
 | **Informative** | Sections of `spec/ADP-N.md` whose heading   | No      |
 |                 | carries the suffix `(Informative)`;         |         |
-|                 | `examples/`; `README.md`                    |         |
+|                 | `examples/`; `README.md`; `CONTRIBUTING.md` |         |
 | **Process**     | `spec/ADP-0.md`; `DEFECTS.md`;              | On the  |
 |                 | `proposals/`                                | process |
+| **Record**      | `experiments/`                              | No      |
 | **Legal**       | `LICENSE`                                   | Legal   |
 
 ### 3.1 Default classification
@@ -91,6 +92,21 @@ When normative artifacts disagree:
 3. Informative artifacts never take precedence over normative ones.
    An informative artifact that contradicts normative text is a
    defect in the informative artifact.
+
+### 3.3 Records
+
+A record documents what happened at a point in time: lab logs,
+audits, experiment results. Records are never binding and never
+take precedence. A record is read at the commit it cites, or at the
+commit that added it. A record that disagrees with later normative
+text is not a defect, and records are not edited to track later
+changes.
+
+### 3.4 Unlisted files
+
+A file matched by no row in §3 is Informative until an accepted
+proposal assigns it a class. A new class is a change to ADP-0 and
+follows §5.
 
 ---
 
@@ -139,6 +155,11 @@ class, not by judgment of impact:
 | Internal contradiction in normative text         | HIGH      |
 | Informative artifact contradicts normative text  | LOW       |
 | Informative artifact internally inconsistent     | LOW       |
+
+When more than one row applies, the highest severity among them is
+the grade. In particular, a normative MUST violation that causes a
+conformant envelope to be rejected or a non-conformant envelope to
+be accepted is CRITICAL, not HIGH.
 
 A grade that departs from this table MUST state the reason in
 `Notes`. Departures without a stated reason are themselves defects.
@@ -292,8 +313,10 @@ adp-protocol/
 ├── conformance/          # created by first validation proposal (§5.5)
 ├── schema/               # normative JSON Schemas
 ├── examples/             # informative
+├── experiments/          # records (§3.3)
 ├── DEFECTS.md            # defect register
 ├── README.md             # informative
+├── CONTRIBUTING.md       # informative
 └── LICENSE
 ```
 
@@ -319,3 +342,8 @@ adp-protocol/
 |            | order SPEC → CONFORMANCE → SCHEMA → IMPL,       |
 |            | errata definition, version impact table,        |
 |            | single-maintainer roles. Bootstrapped per §2.   |
+| 2026-11-15 | Pre-adoption revision: Record class for         |
+|            | `experiments/` (§3.3); `CONTRIBUTING.md`        |
+|            | classified informative; unlisted files default  |
+|            | to Informative (§3.4); highest applicable       |
+|            | severity wins (§4.4); layout updated (§9).      |
