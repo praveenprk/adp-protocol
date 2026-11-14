@@ -1,0 +1,127 @@
+#!/bin/sh
+# test — exercise the CI checks against fixed good and bad cases.
+# check_defects runs on mutated copies of DEFECTS.md (the real file is
+# never touched); check-schema-gate and check-commits run in a throwaway repo.
+# Usage: scripts/ci/test [PYTHON]   (PYTHON needs nothing beyond stdlib)
+# Output: TAP on stdout. Exit: 0 all pass, 1 any failure.
+# Substrate: POSIX sh, git, sed, mktemp.
+
+set -u
+
+py=${1:-python3}
+src=$(cd "$(dirname "$0")" && pwd -P)
+home=$(cd "$src" && git rev-parse --show-toplevel) || exit 1
+work=$(mktemp -d) || exit 1
+trap 'rm -rf "$work"' EXIT INT TERM
+
+n=0
+failed=0
+
+check() {   # check <pass | refuse> <description> <command...>
+    expect=$1; desc=$2; shift 2
+    n=$((n + 1))
+    if out=$("$@" 2>&1); then got=pass; else got=refuse; fi
+    if [ "$got" = "$expect" ]; then
+        printf 'ok %d - %s\n' "$n" "$desc"
+    else
+        printf 'not ok %d - %s (expected %s; got %s: %s)\n' "$n" "$desc" "$expect" "$got" "$(printf %s "$out" | head -n 1)"
+        failed=$((failed + 1))
+    fi
+}
+
+# --- check_defects: base is HEAD, candidates are mutated copies ---------
+cd "$home" || exit 1
+defects() { "$py" "$src/check_defects.py" HEAD "$1"; }
+copy() { cp DEFECTS.md "$work/$1.md"; printf '%s' "$work/$1.md"; }
+entry() {   # entry ID SEVERITY -> a complete new entry
+    printf '\n### %s\nArtifact    : x\nSays        : x\nDoes        : x\nEvidence    : x\nSeverity    : %s\nStatus      : OPEN\nResolved by : —\n' "$1" "$2"
+}
+
+f=$(copy same)
+f_sev=$(copy sev);       sed -i.bak '/^### ADP-D-005$/,/^Severity/s/^Severity    : HIGH/Severity    : LOW/' "$f_sev"
+f_ev=$(copy ev);         sed -i.bak 's/harness: `major-2` → True/harness: `major-2` → False/' "$f_ev"
+f_del=$(copy del);       sed -i.bak 's/^### ADP-D-017$/### gone/' "$f_del"
+f_status=$(copy status); sed -i.bak '/^### ADP-D-001$/,/^Status/s/^Status      : OPEN/Status      : RESOLVED/' "$f_status"
+f_badst=$(copy badst);   sed -i.bak '/^### ADP-D-001$/,/^Status/s/^Status      : OPEN/Status      : FIXED/' "$f_badst"
+f_good=$(copy good);     entry ADP-D-018 LOW    >> "$f_good"
+f_gap=$(copy gap);       entry ADP-D-019 LOW    >> "$f_gap"
+f_dup=$(copy dup);       entry ADP-D-017 LOW    >> "$f_dup"
+f_badsv=$(copy badsv);   entry ADP-D-018 URGENT >> "$f_badsv"
+f_miss=$(copy miss);     entry ADP-D-018 LOW | sed '/^Evidence/d' >> "$f_miss"
+
+echo "# check_defects"
+check pass   "unchanged register"                     defects "$f"
+check pass   "Status changes after filing"            defects "$f_status"
+check pass   "valid new entry appended"               defects "$f_good"
+check refuse "Severity changed after filing"          defects "$f_sev"
+check refuse "Evidence changed after filing"          defects "$f_ev"
+check refuse "entry removed"                          defects "$f_del"
+check refuse "invalid Status value"                   defects "$f_badst"
+check refuse "ID sequence has a gap"                  defects "$f_gap"
+check refuse "duplicate ID"                           defects "$f_dup"
+check refuse "invalid Severity value"                 defects "$f_badsv"
+check refuse "new entry missing a required field"     defects "$f_miss"
+check pass   "DEFECTS.md itself untouched"            git -C "$home" diff --quiet -- DEFECTS.md
+
+# --- check-schema-gate and check-commits: throwaway repo ----------------
+cd "$work" || exit 1
+git init -q -b main repo && cd repo || exit 1
+git config user.email test@example.invalid
+git config user.name test
+mkdir -p scripts spec schema proposals
+cp -R "$home/scripts/hooks" "$home/scripts/ci" scripts/
+printf '# ADP-1: Spec\n' > spec/ADP-1.md
+printf '{}\n' > schema/x.json
+printf '# ADP-A-001: Accepted one\n\n## Decision\n\nACCEPTED 2026-11-15. Reason.\n' > proposals/ADP-A-001-ok.md
+printf '# ADP-A-002: Mentions all words\n\n## Decision\n\n(ACCEPTED | REJECTED | DEFERRED, empty until decided)\n' > proposals/ADP-A-002-open.md
+printf '# ADP-A-003: Rejected\n\n## Decision\n\nREJECTED 2026-11-15.\n' > proposals/ADP-A-003-no.md
+git add -A && git commit -qm "chore(fixture): base for gate tests — ADP-1" --no-verify
+base=$(git rev-parse HEAD)
+
+commit_schema() {   # commit_schema SUBJECT -> commit touching schema/
+    printf '{"v":%s}\n' "$(date +%s%N)" > schema/x.json
+    git commit -qam "$1" --no-verify
+}
+gate() { sh scripts/ci/check-schema-gate "$1" HEAD; }
+commits() { sh scripts/ci/check-commits "$1" HEAD; }
+
+echo "# check-schema-gate"
+commit_schema "schema(dispatch): apply the accepted proposal — ADP-A-001"
+check pass   "schema change anchored to ACCEPTED proposal"   gate "$base"
+b1=$(git rev-parse HEAD)
+git commit -q --allow-empty -m "docs(adp-1): unrelated change, no schema — ADP-1" --no-verify
+check pass   "no schema change in range"                     gate "$b1"
+b2=$(git rev-parse HEAD)
+commit_schema "schema(dispatch): change without a proposal — ADP-1"
+check refuse "schema change with no ADP-A anchor"            gate "$b2"
+git reset -q --hard "$b2"
+commit_schema "schema(dispatch): proposal not yet decided — ADP-A-002"
+check refuse "ACCEPTED only inside a placeholder"            gate "$b2"
+git reset -q --hard "$b2"
+printf '# ADP-A-004: Bare placeholder\n\n## Decision\n\nACCEPTED | REJECTED | DEFERRED\n' > proposals/ADP-A-004-bare.md
+printf '# ADP-A-005: Bold list\n\n## Decision\n\n- **ACCEPTED** 2026-11-15. Reason.\n' > proposals/ADP-A-005-bold.md
+git add -A && git commit -qm "docs(fixture): more proposals — ADP-1" --no-verify
+b3=$(git rev-parse HEAD)
+commit_schema "schema(dispatch): bare placeholder only — ADP-A-004"
+check refuse "bare placeholder without parentheses"          gate "$b3"
+git reset -q --hard "$b3"
+commit_schema "schema(dispatch): bold list decision — ADP-A-005"
+check pass   "'- **ACCEPTED**' decision line"                gate "$b3"
+git reset -q --hard "$b2"
+commit_schema "schema(dispatch): proposal was rejected — ADP-A-003"
+check refuse "REJECTED proposal"                             gate "$b2"
+git reset -q --hard "$b2"
+commit_schema "schema(dispatch): proposal does not exist — ADP-A-009"
+check refuse "missing proposal file"                         gate "$b2"
+git reset -q --hard "$b2"
+
+echo "# check-commits"
+check pass   "conforming commits in range"                   commits "$base"
+git commit -q --allow-empty -m "spec: old format subject — ADP-1" --no-verify
+check refuse "non-conforming subject in range"               commits "$base"
+git reset -q --hard "$b2"
+git commit -q --allow-empty -m "docs(adp-1): attribution sneaks in — ADP-1" -m "Co-authored-by: x <x@y>" --no-verify
+check refuse "co-author line in range"                       commits "$base"
+
+printf '1..%d\n' "$n"
+[ "$failed" -eq 0 ]

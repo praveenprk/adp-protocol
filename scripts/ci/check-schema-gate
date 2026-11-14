@@ -1,0 +1,49 @@
+#!/bin/sh
+# check-schema-gate — every non-merge commit in BASE..HEAD that changes
+# schema/ must anchor an ADP-A proposal whose Decision section records
+# ACCEPTED (ADP-0 §5.3, §5.4).
+#
+# A proposal is proposals/ADP-A-NNN-<slug>.md. Its decision is recorded
+# under a heading containing "Decision", as a line beginning with
+# ACCEPTED (optionally after '- ', '* ' or '**'). A placeholder such as
+# 'ACCEPTED | REJECTED | DEFERRED' is not a decision.
+#
+# Usage: scripts/ci/check-schema-gate BASE [HEAD]
+# Substrate: POSIX sh, git, grep, awk, tr. Exit: 0 pass, 1 refused. Quiet on success.
+
+set -u
+
+[ $# -ge 1 ] || { printf 'usage: check-schema-gate BASE [HEAD]\n' >&2; exit 2; }
+base=$1
+head=${2:-HEAD}
+root=$(git rev-parse --show-toplevel) || exit 2
+
+accepted() {   # accepted ADP-A-NNN -> 0 if a proposal file records ACCEPTED
+    for f in "$root"/proposals/"$1"-*.md; do
+        [ -f "$f" ] || continue
+        awk '
+            /^#+ / { in_dec = ($0 ~ /Decision/) ; next }
+            in_dec && /^[[:space:]]*([-*][[:space:]]+)?(\*\*)?ACCEPTED(\*\*)?([^A-Za-z|]|$)/ \
+                   && !/ACCEPTED(\*\*)?[[:space:]]*\|/ { found = 1 }
+            END { exit !found }
+        ' "$f" && return 0
+    done
+    return 1
+}
+
+failed=0
+for c in $(git rev-list --no-merges --reverse "$base..$head"); do
+    git diff-tree --no-commit-id --name-only -r "$c" -- schema/ | grep -q . || continue
+    subject=$(git log -1 --format=%s "$c")
+    ok=no
+    for p in $(printf '%s\n' "$subject" | tr -cs 'A-Z0-9-' '\n' | grep -E '^ADP-A-[0-9]+$'); do
+        accepted "$p" && { ok=yes; break; }
+    done
+    if [ "$ok" = no ]; then
+        printf '%s %s\n  changes schema/ without an ACCEPTED ADP-A proposal anchor (ADP-0 §5.4)\n' \
+            "$(git rev-parse --short "$c")" "$subject" >&2
+        failed=1
+    fi
+done
+
+exit "$failed"
