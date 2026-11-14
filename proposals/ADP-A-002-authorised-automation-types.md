@@ -8,6 +8,29 @@
 | **Bump**    | None for ADP-1. ADP-2 enters at 1.0.0, Draft |
 | **Author**  | Contributor (agent-drafted, ADP-0 §8)  |
 | **Drafted** | 2026-11-15                             |
+| **Revised** | 2026-11-15, after maintainer review on PR #8 |
+
+---
+
+## Outcome and impact
+
+**In one line:** ADP gains a contract for *who may ask an agent to do what*.
+Codebase create and delete need a human signature, scaled to blast radius.
+Everything else runs under a session grant that can never cover the agent's
+own guardrails.
+
+| Area | Effect when applied |
+|------|---------------------|
+| ADP-1 | None. No text, schema or verdict changes. |
+| New normative text | `spec/ADP-2.md`: eight automation types, mapping of the ADP-1 keywords, the grant document, the codebase event classes with blast radius (R1 to R3), invariants G-1 to G-9. |
+| Envelopes | ADP-1-only envelopes stay valid. An ADP-2-conformant dispatch also lists exactly one grant id in `dispatch.anchor`. |
+| Human touch points | Ruling, RFC/SPEC approval and merge stay human-only, and no grant can confer them. Codebase create and delete need a human-signed record. Depending on blast radius, that record covers one event, one session or one cycle. |
+| Guardrails | G-7: a grant's write scope never overlaps its `protected` paths. An agent cannot be granted write access to its own enforcement. |
+| Conformance | Under the ADP-A-001 Decision, this proposal creates `conformance/`. See Conformance impact and Q5. |
+| Risk | The validator proves only that the orchestrator *asked* within authority. Proving that the agent *acted* within it is the runtime's job (ADP-2 §6). |
+
+Merging this proposal does not apply it. Application is a separate
+change (see Application).
 
 ---
 
@@ -111,12 +134,36 @@ read the same way whichever is applied first.
 > | | `AT-WRITE` | Create or modify files inside an existing codebase | Per-session grant |
 > | | `AT-VCS` | Commit, push to a non-default branch, open a pull request | Per-session grant |
 > | | `AT-TOOL` | Call an external tool or service, such as an MCP server | Per-session grant |
-> | Human-signed | `AT-CODEBASE-CREATE` | Bring a codebase into existence | Human-signed record, one per event |
-> | | `AT-CODEBASE-DELETE` | Destroy a codebase | Human-signed record, one per event |
+> | Human-signed | `AT-CODEBASE-CREATE` | Bring a codebase into existence (§2.1) | Human-signed record, span by radius (G-9) |
+> | | `AT-CODEBASE-DELETE` | Archive or destroy a codebase (§2.1) | Human-signed record, span by radius (G-9) |
 >
 > The following are **not** automation types. No grant and no human-signed
 > record confers them on an agent: a ruling, approving an RFC or SPEC,
 > merging to a codebase's default branch, and issuing or changing a grant.
+>
+> ##### 2.1 Codebase events and blast radius
+>
+> `AT-CODEBASE-CREATE` and `AT-CODEBASE-DELETE` each cover the event classes
+> below. Each class has a blast radius, R1 (contained) to R3 (irreversible or
+> public).
+>
+> | Class | Type | Event | Reversible | Radius |
+> |---|---|---|---|---|
+> | `CREATE-SCRATCH` | create | New codebase under a declared sandbox root, with no remote | Yes | R1 |
+> | `CREATE-PRIVATE` | create | New codebase with a private remote inside a declared namespace | Yes | R2 |
+> | `CREATE-PUBLIC` | create | New codebase that is public or outside every declared namespace, including a fork | No. Once public, content can be copied | R3 |
+> | `DELETE-SCRATCH` | delete | Delete a `CREATE-SCRATCH` codebase made in the same cycle | Not needed. Nothing else depends on it | R1 |
+> | `ARCHIVE` | delete | Make a codebase read-only, keeping its history | Yes | R2 |
+> | `DELETE` | delete | Permanently remove a codebase, or the only copy of any of its commits | No | R3 |
+>
+> These are **not** codebase events: adding or removing a worktree, creating
+> or deleting a non-default branch, and cloning an existing codebase (same
+> identity). They fall under `AT-VCS` or `AT-WRITE`. Deleting a local clone
+> is a `DELETE` if the clone holds commits that exist on no other copy.
+>
+> A **cycle** is the span from the maintainer's approval of an RFC and SPEC
+> to the pull request that work produces. A **session** is one agent session
+> under one grant.
 >
 > #### 3. Keyword mapping
 >
@@ -193,9 +240,16 @@ read the same way whichever is applied first.
 > - **G-8** A grant ends at `expires_at` or when its session ends,
 >   whichever comes first. A grant is never renewed. Continuing requires a
 >   new grant with a new root.
-> - **G-9** `AT-CODEBASE-CREATE` and `AT-CODEBASE-DELETE` each REQUIRE a
->   human-signed record that names the codebase, is used for one event only,
->   and is not a grant.
+> - **G-9** An agent MAY carry out a codebase event (§2.1) only under a
+>   human-signed record that is not a grant. The record MUST state:
+>   - `classes`: the event classes it covers;
+>   - `boundary`: the sandbox roots, namespaces or exact codebases it covers,
+>     plus an optional maximum event count;
+>   - `span`: `event`, `session` or `cycle`.
+>
+>   The widest `span` allowed depends on the highest radius among `classes`:
+>   R1 allows `cycle`, R2 allows `cycle`, R3 allows `event` only. An `event`
+>   record names exactly one codebase and is used once.
 >
 > #### 6. Validation and enforcement
 >
@@ -225,12 +279,11 @@ read the same way whichever is applied first.
 ## Conformance impact
 
 - **ADP-1 vectors:** none. `conformance/` does not exist yet.
-- **ADP-2:** defines a new validator, so it touches validation. Under
-  ADP-0 §5.5, the first accepted proposal that touches validation MUST
-  create `conformance/`. If this proposal is accepted before any other
-  proposal that touches validation, it carries that duty. It would then also
-  define the vector format and add, for each of G-1 to G-7 and G-9, at least
-  one vector that passes and one that fails. See question Q5.
+- **ADP-2:** defines a new validator, so it touches validation. The
+  ADP-A-001 Decision (`d9f7255`) assigns the creation of `conformance/`
+  (ADP-0 §5.5) to this proposal. Whichever option Q5 settles on, ADP-2
+  needs at least one passing and one failing vector for each of G-1 to G-7
+  and G-9. Under option (a), this proposal also defines the vector format.
 - **Schemas:** a `schema/grant.schema.json` would be added at ADP-0 §5.4
   step 3. The CI job `schema` already requires an ACCEPTED proposal for any
   change under `schema/`.
@@ -252,13 +305,59 @@ read the same way whichever is applied first.
 
 ## Questions for the maintainer
 
-| # | Question | Draft default |
-|---|----------|---------------|
-| Q1 | For codebase create and delete: may an agent carry out the act once a human has signed that one event, or must the human perform it? | The agent may carry it out with a per-event human-signed record (G-9). |
-| Q2 | Should the human-signed tier also include data deletion, schema migration and security changes? | No. It is kept to the two events in the ruling. Raising the risk class of a work item is a factory matter, not part of ADP-2. |
-| Q3 | Which signature mechanism: a signed git commit or tag, an SSH or GPG signature over the grant's sha256, or something else? | Deferred. G-6 and G-9 fix the field, not the algorithm. |
-| Q4 | Does "codebase" include the hosted remote, so that creating a repository on a forge counts as a create? | Yes. Identity is the canonical remote URL (§1). |
-| Q5 | Should this proposal create `conformance/` (ADP-0 §5.5), or should it wait for a validation proposal against ADP-1 to create it first? | Wait. ADP-2 vectors are added once `conformance/` exists. |
+Answers come from the maintainer's review on PR #8. They are recorded here so
+the proposal reads complete. They are not the Decision (ADP-0 §5.3).
+
+| # | Question | Maintainer answer | Effect on this draft |
+|---|----------|-------------------|----------------------|
+| Q1 | For codebase create and delete: may an agent carry out the act once a human has signed, and at what granularity? | "What kind of creation and deletion? There could be a boundary for smaller blast radius. Agent MAY carry it out with a per-event or per-session per-cycle human sign record." | Added §2.1 (six event classes, radius R1 to R3, cycle and session defined). G-9 now carries `classes`, `boundary` and `span`. **Follow-up Q1a below.** |
+| Q2 | Should the human-signed tier also include data deletion, schema migration and security changes? | "Correct. Don't raise risk class." | Settled. Kept to the two events. |
+| Q3 | Which signature mechanism? | "Field first, algo later." | Settled. G-6 and G-9 fix the fields only. |
+| Q4 | Does "codebase" include the hosted remote? | No answer yet | Draft default stands: yes, identity is the canonical remote URL (§1). |
+| Q5 | Should this proposal create `conformance/`? | "Will need more context to answer." | Context below. **Open.** |
+
+### Q1a: span by radius
+
+G-9 as drafted:
+
+| Radius | Classes | Widest span |
+|---|---|---|
+| R1 | `CREATE-SCRATCH`, `DELETE-SCRATCH` | `cycle` |
+| R2 | `CREATE-PRIVATE`, `ARCHIVE` | `cycle` |
+| R3 | `CREATE-PUBLIC`, `DELETE` | `event` |
+
+The question: should R2 be held to `session` instead of `cycle`? A cycle
+can span several sessions and several days. A private remote outlives the
+cycle unless something deletes it.
+
+### Q5: context
+
+- **What `conformance/` is.** A directory of test vectors: envelopes, each
+  with its expected verdict (pass or fail) and the rule it exercises. ADP-0
+  §5.4 step 2 needs it so that every changed rule has one passing and one
+  failing vector. ADP-0 §5.5 forbids any implementation from claiming ADP
+  conformance until it exists.
+- **Why it lands here.** ADP-0 §5.5 says the first accepted proposal that
+  touches validation creates it. The ADP-A-001 Decision (`d9f7255`) reads
+  that A-001 does not touch validation, and states that `conformance/` "is
+  created by ADP-A-002". ADP-2 defines a new validator, so it does touch
+  validation.
+- **What creating it costs here.** This proposal would also have to define
+  the vector format: file layout, how the expected verdict is written, and
+  how a vector names its rule and spec version. ADP-0 §5.1 says a proposal
+  MUST NOT bundle unrelated changes, and a suite format for all of ADP is a
+  separate concern from authority.
+- **Options:**
+  - **(a)** A-002 defines the format and creates `conformance/` with its
+    G-1 to G-9 vectors. This matches the A-001 Decision text, but makes
+    A-002 a bundle.
+  - **(b)** A small separate proposal, ADP-A-003 *Conformance suite
+    format*, creates `conformance/` and the format, plus the first vectors
+    for ADP-1 §7. A-002 then adds only its own vectors. This respects §5.1,
+    but needs the maintainer to say so, because the A-001 Decision names
+    A-002.
+- **Draft recommendation:** (b). The format is shared by every later
+  proposal, so it should be reviewed on its own.
 
 ---
 
@@ -267,7 +366,8 @@ read the same way whichever is applied first.
 1. **SPEC:** add `spec/ADP-2.md` with the text above, in one commit:
    `spec(adp-2): add Dispatch Authority — ADP-A-002`.
 2. **CONFORMANCE:** ADP-2 vectors (G-1 to G-7 and G-9, one passing and one
-   failing each), or `conformance/` itself, depending on Q5.
+   failing each). Under Q5 option (a), this step also creates `conformance/`
+   and its format. Under option (b), ADP-A-003 must be applied first.
 3. **SCHEMA:** `schema/grant.schema.json`.
 4. **IMPLEMENTATION:** none exists.
 5. **INFORMATIVE:** one row for ADP-2 in the `README.md` structure listing.
