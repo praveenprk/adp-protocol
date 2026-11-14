@@ -1,0 +1,41 @@
+adp_version: "1.0.0"
+
+dispatch:
+  agent: "impl-agent"
+  model: "sonnet"
+  tier: 3
+  anchor:
+    - "SPEC-027"
+    - "V-027-02"
+  gate: "CODE"
+  branch: "rfc/RFC-027-destructive-operation-governance"
+
+context:
+  read:
+    - path: "docs/specs/SPEC-027.md"
+      sections: ["§5 INV-027-16"]
+    - path: "docs/design/destructive-op-governance-contract.md"
+      sections: ["Seam 4"]
+    - path: "tests/spec/test_spec_027.py"
+  ignore:
+    - "docs/rfcs/*"
+    - "docs/VIOLATIONS.md"
+
+produce:
+  - path: "contextos/approve.py"
+    action: "modify"
+
+work_items:
+  - keyword: "BIND"
+    description: "replace VIOLATES edge deletion with OVERRIDES edge creation per DESIGN Seam 4 shape"
+
+exit:
+  - "test_spec_027::test_inv_027_16 passes"
+  - "no other test regresses"
+  - "VIOLATES edge preserved post-approval"
+  - "VIOLATIONS.md updated V-027-02 RESOLVED in same commit"
+
+report:
+  - "commit_hash"
+  - "test_result"
+  - "confirm_violates_edge_persists"

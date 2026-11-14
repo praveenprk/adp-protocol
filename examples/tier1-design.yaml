@@ -1,0 +1,93 @@
+adp_version: "1.0.0"
+
+dispatch:
+  agent: "design-agent"
+  model: "opus"
+  tier: 1
+  anchor:
+    - "SPEC-027"
+    - "RFC-027"
+  gate: "DESIGN"
+  branch: "rfc/RFC-027-destructive-operation-governance"
+
+context:
+  read:
+    - path: "docs/specs/SPEC-027.md"
+      sections: ["§4", "§6", "§7", "§9"]
+    - path: "docs/rfcs/RFC-027.md"
+    - path: "docs/KERNEL_SPEC.md"
+      sections: ["Axiom I", "Axiom II", "Axiom III", "G2", "G6"]
+    - path: "docs/design/graph-abstraction-layer.md"
+      sections: ["§4", "§5", "§6"]
+    - path: "docs/design/ledger-store-architecture.md"
+    - path: "docs/design/agentnode-contract.md"
+    - path: "docs/specs/SPEC-013.md"
+    - path: "docs/specs/SPEC-020.md"
+    - path: "docs/specs/SPEC-026.md"
+  ignore:
+    - "contextos/*.py"
+    - "tests/**"
+    - "docs/VIOLATIONS.md"
+
+produce:
+  - path: "docs/design/destructive-op-governance-contract.md"
+    action: "create"
+
+work_items:
+  - keyword: "BIND"
+    description: "DestructiveOpDescriptor field set, DestructionImpact field set, DestructiveSession method signatures, shared-resolution mechanism, subset-of-predicted enforcement — runtime vs post-hoc vs both"
+    source: "SPEC-027 §7"
+    metadata:
+      x-contextos-seam: 1
+
+  - keyword: "BIND"
+    description: "hex code per SPEC-013 registry, constant name + location, payload vs envelope field placement per §6 F7, integrity_hash serialization rule"
+    source: "SPEC-027 §4 Q1"
+    metadata:
+      x-contextos-seam: 2
+
+  - keyword: "BIND"
+    description: "closed-list physical location, scan mechanism, registry-additions governance, migrate.py as first registered chokepoint"
+    source: "SPEC-027 §4 Q5, §9"
+    metadata:
+      x-contextos-seam: 3
+
+  - keyword: "BIND"
+    description: "superseding structure for Claim-Rule violation edge — status property vs superseding edge vs superseding node. Must preserve distinguishable-from-never-flagged at query time"
+    source: "SPEC-027 INV-027-16"
+    metadata:
+      x-contextos-seam: 4
+
+  - keyword: "BIND"
+    description: "session-classifier home — dedicated function vs inline. Classification record location. Test-gate assertion shape sufficient for test-agent"
+    source: "SPEC-027 §9 INV-027-17"
+    metadata:
+      x-contextos-seam: 5
+
+  - keyword: "BIND"
+    description: "idempotent re-issue — write no-op ledger marker or nothing. Address auditability, idempotency-key detection, G6 consistency"
+    source: "SPEC-027 §9 Class 4"
+    metadata:
+      x-contextos-seam: 6
+
+  - keyword: "BIND"
+    description: "pre-image capture for identity layer (rotated keys — cannot store plaintext) and connector layer (terminal vs reconstructable). Per-layer: mechanism, storage location, security constraints"
+    source: "SPEC-027 §9"
+    metadata:
+      x-contextos-seam: 7
+
+exit:
+  - "all seven seams present with bound shape, location, test assertion shape, code-gate note"
+  - "implementation order section present and dependency-respecting"
+  - "xfail_baseline.txt unchanged"
+  - "no SPEC/RFC/VIOLATIONS.md/test/impl file modified"
+  - "grep -i neo4j|cypher returns zero matches"
+
+report:
+  - "file_path"
+  - "commit_hash"
+  - "shape_decision_per_seam"
+  - "implementation_order"
+  - "grep_result"
+  - "open_questions_count"
+  - "confirm_no_governance_docs_touched"

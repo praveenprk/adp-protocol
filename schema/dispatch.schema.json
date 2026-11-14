@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adp-protocol.dev/schema/dispatch.schema.json",
+  "title": "ADP Dispatch Envelope",
+  "description": "Structured instruction from orchestrator to agent per ADP-1 v1.0.0",
+  "type": "object",
+  "required": ["adp_version", "dispatch", "context", "exit", "report"],
+  "additionalProperties": false,
+  "properties": {
+    "adp_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semver protocol version"
+    },
+    "dispatch": {
+      "type": "object",
+      "required": ["agent", "anchor"],
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Agent identifier"
+        },
+        "anchor": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Traceable governing references"
+        },
+        "model": {
+          "type": "string",
+          "description": "Model identifier"
+        },
+        "tier": {
+          "type": "integer",
+          "enum": [1, 2, 3],
+          "description": "Compression tier indexed to judgment density"
+        },
+        "gate": {
+          "type": "string",
+          "description": "Gate identifier"
+        },
+        "branch": {
+          "type": "string",
+          "description": "Version control branch"
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "required": ["read"],
+      "additionalProperties": false,
+      "properties": {
+        "read": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ReadEntry" },
+          "minItems": 1,
+          "description": "Required context consumed before work"
+        },
+        "ignore": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Isolation boundary patterns"
+        }
+      }
+    },
+    "produce": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ProduceEntry" },
+      "description": "Output artifacts"
+    },
+    "work_items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/WorkItem" },
+      "description": "Directive-bearing work items"
+    },
+    "exit": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "description": "Binary pass/fail completion conditions"
+    },
+    "report": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "description": "Structured handoff items"
+    }
+  },
+  "anyOf": [
+    { "required": ["produce"] },
+    { "required": ["work_items"] }
+  ],
+  "$defs": {
+    "ReadEntry": {
+      "type": "object",
+      "required": ["path"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "File or resource path"
+        },
+        "sections": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Section-level references"
+        }
+      }
+    },
+    "ProduceEntry": {
+      "type": "object",
+      "required": ["path"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Output artifact path"
+        },
+        "action": {
+          "type": "string",
+          "enum": ["create", "modify"],
+          "description": "Create new or modify existing"
+        }
+      }
+    },
+    "WorkItem": {
+      "type": "object",
+      "required": ["keyword", "description"],
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "enum": [
+            "PRODUCE",
+            "BIND",
+            "CONFIRM",
+            "SURFACE",
+            "DEFER",
+            "READ",
+            "IGNORE",
+            "REPORT",
+            "EXIT",
+            "ANCHOR"
+          ],
+          "description": "ADP keyword directive"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Directive content"
+        },
+        "source": {
+          "type": "string",
+          "description": "Origin reference in governing document"
+        },
+        "metadata": {
+          "type": "object",
+          "patternProperties": {
+            "^x-[a-z]+-[a-z0-9-]+$": {}
+          },
+          "additionalProperties": false,
+          "description": "Namespaced extension fields"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

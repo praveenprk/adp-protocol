@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adp-protocol.dev/schema/report.schema.json",
+  "title": "ADP Report Envelope",
+  "description": "Structured result from agent to orchestrator per ADP-1 v1.0.0",
+  "type": "object",
+  "required": ["adp_version", "report", "exit_results", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "adp_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semver protocol version"
+    },
+    "report": {
+      "type": "object",
+      "required": ["agent", "anchor", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "agent": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Agent identifier"
+        },
+        "anchor": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Traceable governing references"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["COMPLETE", "BLOCKED", "SURFACE"],
+          "description": "Dispatch outcome"
+        }
+      }
+    },
+    "exit_results": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ExitResult" },
+      "minItems": 1,
+      "description": "Pass/fail for each EXIT condition"
+    },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ReportItem" },
+      "minItems": 1,
+      "description": "Structured handoff items"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "report": {
+            "properties": { "status": { "const": "BLOCKED" } }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "items": {
+            "contains": {
+              "properties": { "key": { "const": "blocker" } },
+              "required": ["key"]
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "report": {
+            "properties": { "status": { "const": "SURFACE" } }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "items": {
+            "contains": {
+              "properties": { "key": { "const": "finding" } },
+              "required": ["key"]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "ExitResult": {
+      "type": "object",
+      "required": ["condition", "result"],
+      "additionalProperties": false,
+      "properties": {
+        "condition": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Echoes the EXIT condition from dispatch"
+        },
+        "result": {
+          "type": "boolean",
+          "description": "Pass or fail"
+        }
+      }
+    },
+    "ReportItem": {
+      "type": "object",
+      "required": ["key", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
