@@ -1,0 +1,8 @@
+# Anchor sources for commit-msg. One source per line, whitespace-separated:
+#   TYPE   FILES (glob, relative to repo root; '-' = exempt)   LINE-PREFIX
+# An anchor resolves if a matching file has a line '<LINE-PREFIX> <ANCHOR>'
+# followed by a space, ':' or end of line. A TYPE may appear on several lines.
+# Paths must not contain spaces. LINE-PREFIX must be literal (no regex).
+ADP       spec/ADP-*.md      #
+ADP-D     DEFECTS.md         ###
+ADP-A     proposals/*.md     #

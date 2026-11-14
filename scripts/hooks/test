@@ -1,0 +1,109 @@
+#!/bin/sh
+# test — exercise commit-msg and pre-push against fixed cases in a throwaway
+# repo, then check that ADP anchors resolve in this repository.
+# Usage: scripts/hooks/test        Output: TAP on stdout.
+# Adapted from eng-principles hooks/test @ c2a3c05: ADP fixtures, real
+# types/anchors config, ':' anchor boundary, ADP_MAINTAINER override.
+# Substrate: POSIX sh, git, mktemp. Exit: 0 all pass, 1 any failure.
+
+set -u
+
+src=$(cd "$(dirname "$0")" && pwd -P)
+home=$(cd "$src" && git rev-parse --show-toplevel) || exit 1
+work=$(mktemp -d) || exit 1
+trap 'rm -rf "$work"' EXIT INT TERM
+
+n=0
+failed=0
+
+check() {   # check <pass | reason-substring> <description> <command...>
+    expect=$1; desc=$2; shift 2
+    n=$((n + 1))
+    if err=$("$@" 2>&1 >/dev/null); then
+        got=pass
+    else
+        got="refused: $err"
+    fi
+    ok=no
+    if [ "$expect" = pass ]; then
+        [ "$got" = pass ] && ok=yes
+    else
+        case $got in "refused: "*"$expect"*) ok=yes ;; esac
+    fi
+    if [ "$ok" = yes ]; then
+        printf 'ok %d - %s\n' "$n" "$desc"
+    else
+        printf 'not ok %d - %s (expected %s; got %s)\n' "$n" "$desc" "$expect" "$(printf %s "$got" | head -n 1)"
+        failed=$((failed + 1))
+    fi
+}
+
+# Fixture repo with its own hooks copy and the real config.
+cd "$work" || exit 1
+git init -q -b main repo && cd repo || exit 1
+git config user.email test@example.invalid
+git config user.name test
+mkdir hooks
+cp "$src/commit-msg" "$src/pre-push" "$src/types" "$src/anchors" "$src/protected" hooks/
+mkdir spec proposals
+printf '# ADP-1: Agent Dispatch Protocol Specification\n' > spec/ADP-1.md
+printf '# ADP-10: Something Else\n' > spec/ADP-10.md
+printf '# ADP Defect Register\n\n### ADP-D-001\n### ADP-D-017\n' > DEFECTS.md
+printf '# ADP-A-001: BCP 14 key words\n' > proposals/ADP-A-001-bcp14.md
+
+msg() { printf '%s\n' "$@" > "$work/msg"; sh hooks/commit-msg "$work/msg"; }
+
+echo "# commit-msg"
+check pass                   "spec anchor, heading ends in ':'"  msg "spec(adp-1): add the key words section — ADP-1"
+check pass                   "ascii hyphen separator"            msg "spec(adp-1): add the key words section - ADP-1"
+check pass                   "defect anchor"                     msg "fix(schema): accept unknown minor fields — ADP-D-001"
+check pass                   "proposal anchor"                   msg "spec(adp-1): apply accepted proposal — ADP-A-001"
+check pass                   "several anchors"                   msg "spec(adp-1): apply accepted proposal — ADP-A-001, ADP-D-001, ADP-1"
+check pass                   "section sign after anchor"         msg "governance(defects): seed the register — ADP-1 §4"
+check pass                   "id range keeps first id"           msg "governance(defects): seed the register — ADP-D-001..017"
+check pass                   "ADP type: governance"              msg "governance(defects): close a defect — ADP-D-017"
+check pass                   "comment lines ignored"             msg "# git comment" "spec(adp-1): add the key words section — ADP-1"
+check pass                   "merge commit skipped"              msg "Merge pull request #9 from x/y"
+check "anchor not found"     "ADP-1 must not match ADP-10 only"  sh -c 'rm spec/ADP-1.md; printf "%s\n" "spec(adp-1): add the key words section — ADP-1" > "$1"; sh hooks/commit-msg "$1"; rc=$?; printf "# ADP-1: Agent Dispatch Protocol Specification\n" > spec/ADP-1.md; exit $rc' _ "$work/msg"
+check "anchor not found"     "unknown spec number"               msg "spec(adp-9): add the key words section — ADP-9"
+check "anchor not found"     "defect id does not exist"          msg "fix(schema): accept unknown minor fields — ADP-D-999"
+check "anchor not found"     "proposal id does not exist"        msg "spec(adp-1): apply accepted proposal — ADP-A-002"
+check "unknown anchor type"  "foreign anchor type"               msg "docs(readme): fix the project tree — ENG-DEC-001"
+check "no anchor"            "no anchor"                         msg "docs(readme): fix the project tree — nothing"
+check "format"               "missing scope"                     msg "spec: add the key words section — ADP-1"
+check "format"               "unknown type"                      msg "feature(adp-1): add the key words section — ADP-1"
+check "format"               "description too short"             msg "spec(adp-1): short — ADP-1"
+check "co-author"            "co-author line"                    msg "spec(adp-1): add the key words section — ADP-1" "" "Co-authored-by: x <x@y>"
+check "empty message"        "empty message"                     msg ""
+
+# Commits for pre-push: a -> b, and c on a side branch from a.
+git add -A && git commit -qm "chore(fixture): base commit for tests — ADP-1" --no-verify
+a=$(git rev-parse HEAD)
+git commit -q --allow-empty -m "b" --no-verify; b=$(git rev-parse HEAD)
+git switch -q -c side "$a"
+git commit -q --allow-empty -m "c" --no-verify; c=$(git rev-parse HEAD)
+z=0000000000000000000000000000000000000000
+
+push() { printf '%s %s %s %s\n' "$1" "$2" "$3" "$4" | sh hooks/pre-push origin url; }
+push_mnt() { printf '%s %s %s %s\n' "$1" "$2" "$3" "$4" | ADP_MAINTAINER=1 sh hooks/pre-push origin url; }
+
+echo "# pre-push"
+check pass                   "new feature branch"                push refs/heads/f "$b" refs/heads/f "$z"
+check pass                   "fast-forward feature branch"       push refs/heads/f "$b" refs/heads/f "$a"
+check "protected ref"        "push to main"                      push refs/heads/main "$b" refs/heads/main "$a"
+check "deletion"             "delete remote branch"              push "(delete)" "$z" refs/heads/f "$a"
+check "non-fast-forward"     "force push (non-fast-forward)"     push refs/heads/f "$c" refs/heads/f "$b"
+check pass                   "maintainer override to main"       push_mnt refs/heads/main "$b" refs/heads/main "$a"
+
+# Real anchors in this repository resolve with the real config.
+cd "$home" || exit 1
+real() { printf '%s\n' "$1" > "$work/msg"; sh "$src/commit-msg" "$work/msg"; }
+
+echo "# this repository"
+check pass                   "ADP-0 resolves"                    real "docs(agents): check the real anchors — ADP-0"
+check pass                   "ADP-1 resolves"                    real "spec(adp-1): check the real anchors — ADP-1"
+check pass                   "ADP-D-001 resolves"                real "governance(defects): check the real anchors — ADP-D-001"
+check pass                   "ADP-D-017 resolves"                real "governance(defects): check the real anchors — ADP-D-017"
+
+printf '1..%d\n' "$n"
+[ "$failed" -eq 0 ]

@@ -12,6 +12,8 @@ Informative (ADP-0 §3). How ADP itself changes is ADP-0, not this file.
 2. `DEFECTS.md`: known defects, with evidence
 3. `spec/ADP-1.md`: the protocol
 
+Once per clone, before the first commit: `scripts/hooks/install`.
+
 ## Roles
 
 - Only the maintainer pushes to `main`, merges, and records proposal
@@ -59,7 +61,8 @@ repository. Report what a check printed, not what it should print.
 | Rule | Mechanism |
 |------|-----------|
 | Push to `main` only via PR; merge commits only; no force-push or deletion of `main` | GitHub ruleset `adp-ruleset` |
-| Commit format, anchor resolves, no attribution lines | `scripts/hooks/commit-msg` + CI (planned) |
+| Commit format, anchor resolves, no attribution lines | `scripts/hooks/commit-msg`; CI (planned) |
+| No push to `main`, no force-push, no remote deletion (local guardrail) | `scripts/hooks/pre-push` |
 | `DEFECTS.md` append-only | CI (planned) |
 | `schema/` changes need an ACCEPTED proposal | CI (planned) |
 | Everything else | Review by the maintainer |
