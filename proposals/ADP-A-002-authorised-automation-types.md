@@ -24,9 +24,9 @@ own guardrails.
 | ADP-1 | None. No text, schema or verdict changes. |
 | New normative text | `spec/ADP-2.md`: eight automation types, mapping of the ADP-1 keywords, the grant document, the codebase event classes with blast radius (R1 to R3), invariants G-1 to G-9. |
 | Envelopes | ADP-1-only envelopes stay valid. An ADP-2-conformant dispatch also lists exactly one grant id in `dispatch.anchor`. |
-| Human touch points | Ruling, RFC/SPEC approval and merge stay human-only, and no grant can confer them. Codebase create and delete need a human-signed record. Depending on blast radius, that record covers one event, one session or one cycle. |
+| Human touch points | Ruling, RFC/SPEC approval and merge stay human-only, and no grant can confer them. Codebase create and delete need a human-signed record. The signer chooses its span, capped by blast radius: R1 up to a cycle, R2 up to a session, R3 one event only. |
 | Guardrails | G-7: a grant's write scope never overlaps its `protected` paths. An agent cannot be granted write access to its own enforcement. |
-| Conformance | Under the ADP-A-001 Decision, this proposal creates `conformance/`. See Conformance impact and Q5. |
+| Conformance | Adds ADP-2 vectors only. `conformance/` and its format come from ADP-A-003 (Q5 option b), which must be applied first. |
 | Risk | The validator proves only that the orchestrator *asked* within authority. Proving that the agent *acted* within it is the runtime's job (ADP-2 §6). |
 
 Merging this proposal does not apply it. Application is a separate
@@ -247,9 +247,17 @@ read the same way whichever is applied first.
 >     plus an optional maximum event count;
 >   - `span`: `event`, `session` or `cycle`.
 >
->   The widest `span` allowed depends on the highest radius among `classes`:
->   R1 allows `cycle`, R2 allows `cycle`, R3 allows `event` only. An `event`
->   record names exactly one codebase and is used once.
+>   `span` is REQUIRED and has no default. The human signer chooses it,
+>   within the widest span allowed for the highest radius among `classes`:
+>
+>   | Radius | Allowed `span` |
+>   |---|---|
+>   | R1 | `event`, `session`, `cycle` |
+>   | R2 | `event`, `session` |
+>   | R3 | `event` only |
+>
+>   An `event` record names exactly one codebase and is used once. A record
+>   whose `span` is wider than its radius allows is invalid.
 >
 > #### 6. Validation and enforcement
 >
@@ -280,10 +288,15 @@ read the same way whichever is applied first.
 
 - **ADP-1 vectors:** none. `conformance/` does not exist yet.
 - **ADP-2:** defines a new validator, so it touches validation. The
-  ADP-A-001 Decision (`d9f7255`) assigns the creation of `conformance/`
-  (ADP-0 §5.5) to this proposal. Whichever option Q5 settles on, ADP-2
-  needs at least one passing and one failing vector for each of G-1 to G-7
-  and G-9. Under option (a), this proposal also defines the vector format.
+  ADP-A-001 Decision (`d9f7255`) named this proposal as the one that
+  creates `conformance/` (ADP-0 §5.5). The maintainer has since chosen Q5
+  option (b): **ADP-A-003** (Conformance suite format) creates
+  `conformance/` and its format. This proposal adds only the ADP-2 vectors,
+  at least one passing and one failing for each of G-1 to G-7 and G-9, in
+  the ADP-A-003 format.
+- **Dependency:** ADP-A-003 MUST be applied before step 2 of this
+  proposal's application. Accepting this proposal does not need to wait for
+  ADP-A-003.
 - **Schemas:** a `schema/grant.schema.json` would be added at ADP-0 §5.4
   step 3. The CI job `schema` already requires an ACCEPTED proposal for any
   change under `schema/`.
@@ -310,27 +323,44 @@ the proposal reads complete. They are not the Decision (ADP-0 §5.3).
 
 | # | Question | Maintainer answer | Effect on this draft |
 |---|----------|-------------------|----------------------|
-| Q1 | For codebase create and delete: may an agent carry out the act once a human has signed, and at what granularity? | "What kind of creation and deletion? There could be a boundary for smaller blast radius. Agent MAY carry it out with a per-event or per-session per-cycle human sign record." | Added §2.1 (six event classes, radius R1 to R3, cycle and session defined). G-9 now carries `classes`, `boundary` and `span`. **Follow-up Q1a below.** |
+| Q1 | For codebase create and delete: may an agent carry out the act once a human has signed, and at what granularity? | "What kind of creation and deletion? There could be a boundary for smaller blast radius. Agent MAY carry it out with a per-event or per-session per-cycle human sign record." | Added §2.1 (six event classes, radius R1 to R3, cycle and session defined). G-9 now carries `classes`, `boundary` and `span`. |
+| Q1a | How wide may an R2 record's span be? | "Configurable, up to session. Let the user decide. Choose your best recommendation." | Settled. In G-9, R2 allows `event` or `session`, and `span` is required with no default. Recommendation below. |
 | Q2 | Should the human-signed tier also include data deletion, schema migration and security changes? | "Correct. Don't raise risk class." | Settled. Kept to the two events. |
 | Q3 | Which signature mechanism? | "Field first, algo later." | Settled. G-6 and G-9 fix the fields only. |
-| Q4 | Does "codebase" include the hosted remote? | No answer yet | Draft default stands: yes, identity is the canonical remote URL (§1). |
-| Q5 | Should this proposal create `conformance/`? | "Will need more context to answer." | Context below. **Open.** |
+| Q4 | Does "codebase" include the hosted remote? | "Go with best recommendation." | Settled as drafted: yes. Recommendation below. |
+| Q5 | Should this proposal create `conformance/`? | "Option (b)." | Settled. ADP-A-003 creates `conformance/` and its format. This proposal adds only ADP-2 vectors. |
 
-### Q1a: span by radius
+### Recommendation for Q1a: R2 span
 
-G-9 as drafted:
+`span` stays a required field with no default. A default would sign
+something the human did not choose. The recommended choice, written into
+ADP-2 as informative guidance:
 
-| Radius | Classes | Widest span |
+| Class | Recommended `span` | Why |
 |---|---|---|
-| R1 | `CREATE-SCRATCH`, `DELETE-SCRATCH` | `cycle` |
-| R2 | `CREATE-PRIVATE`, `ARCHIVE` | `cycle` |
-| R3 | `CREATE-PUBLIC`, `DELETE` | `event` |
+| `CREATE-PRIVATE` | `session` | A session usually sets up one piece of work and may need a scratch remote more than once. The repository stays private and can be deleted. |
+| `ARCHIVE` | `event` | It acts on a codebase that already exists and has value. One codebase, one signature. |
 
-The question: should R2 be held to `session` instead of `cycle`? A cycle
-can span several sessions and several days. A private remote outlives the
-cycle unless something deletes it.
+`cycle` is not allowed for R2. A cycle can run for several sessions and
+several days, and a private remote created early in it would outlive the
+human's view of the work.
 
-### Q5: context
+### Recommendation for Q4: hosted remote
+
+Yes. Creating a repository on a forge (GitHub, GitLab, etc.) is a codebase
+create. Deleting or archiving one is a codebase delete. A codebase's
+identity is its canonical remote URL. A codebase with no remote is
+identified by host and root path (§1). Reasons:
+
+- Most of the blast radius is on the forge, not on disk. Visibility,
+  forks, CI secrets and webhooks all live there.
+- The maintainer's example (chat platform → MCP server → codebase) reaches
+  codebases through forge APIs, so a rule that only covers the local
+  filesystem would miss the main path.
+- One identity per codebase lets a single signed record cover the local
+  clone and the remote together, with no double signing.
+
+### Q5: context (as given before the answer)
 
 - **What `conformance/` is.** A directory of test vectors: envelopes, each
   with its expected verdict (pass or fail) and the rule it exercises. ADP-0
@@ -366,8 +396,8 @@ cycle unless something deletes it.
 1. **SPEC:** add `spec/ADP-2.md` with the text above, in one commit:
    `spec(adp-2): add Dispatch Authority — ADP-A-002`.
 2. **CONFORMANCE:** ADP-2 vectors (G-1 to G-7 and G-9, one passing and one
-   failing each). Under Q5 option (a), this step also creates `conformance/`
-   and its format. Under option (b), ADP-A-003 must be applied first.
+   failing each), in the ADP-A-003 format. ADP-A-003 must be applied first
+   (Q5).
 3. **SCHEMA:** `schema/grant.schema.json`.
 4. **IMPLEMENTATION:** none exists.
 5. **INFORMATIVE:** one row for ADP-2 in the `README.md` structure listing.
