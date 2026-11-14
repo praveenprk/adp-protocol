@@ -1,93 +1,419 @@
-# ADP — Agent Dispatch Protocol
+# ADP-1: Agent Dispatch Protocol Specification
 
-A structured protocol for the instruction boundary between orchestrators and AI agents.
+| Field        | Value                                   |
+|--------------|-----------------------------------------|
+| **ID**       | ADP-1                                   |
+| **Title**    | Agent Dispatch Protocol                 |
+| **Version**  | 1.0.0                                   |
+| **Status**   | Draft                                   |
+| **License**  | Apache 2.0                              |
+| **Date**     | 2026-06-26                              |
 
-ADP standardizes how an orchestrator (human, AI, CI pipeline, hardware controller) tells an agent (LLM, code agent, hardware agent, human operator) what to do — and how the agent reports back.
+---
 
-## The Problem
+## Abstract
 
-The AI agent industry has no instruction protocol. MCP standardized tool calls. OpenAPI standardized API descriptions. The instruction boundary — the most consequential interface in any agent system — is unstructured prose.
+ADP is a structured protocol for the instruction boundary between
+an orchestrator and an agent. It defines a keyword vocabulary, an
+envelope schema, a report schema, compression tiers, and a
+validation contract. Transport-agnostic. Model-agnostic.
+Framework-agnostic.
 
-ADP fixes this with a keyword vocabulary, an envelope schema, and a validation contract.
+ADP governs the envelope, not the content. It does not tell agents
+what to think. It structures how they receive instructions and
+return results.
 
-## Quick Start
+---
+
+## 1. Problem
+
+The instruction boundary between orchestrators and agents has no
+protocol. Every framework reinvents it as unstructured prose.
+Prompt templates, task YAML, message dicts, markdown instructions
+— all are string concatenation with no structural contract between
+sender and receiver.
+
+MCP standardized the tool interface (agent → service). OpenAPI
+standardized API description (service → consumer). Nothing
+standardizes the instruction interface (orchestrator → agent).
+
+ADP fills this gap.
+
+---
+
+## 2. Scope
+
+ADP governs:
+- The structure of a dispatch envelope (orchestrator → agent)
+- The structure of a report envelope (agent → orchestrator)
+- A fixed keyword vocabulary for work item directives
+- Compression tiers for judgment-density-indexed verbosity
+- A validation contract for envelope conformance
+
+ADP does not govern:
+- Prompt engineering technique
+- Model selection
+- Agent internal reasoning
+- Transport mechanism
+- Application-layer semantics of work items
+
+---
+
+## 3. Keyword Vocabulary
+
+10 keywords. Fixed at v1.0.0. Uppercase in envelopes. Each is a
+structural directive with defined semantics.
+
+### 3.1 Action Keywords
+
+| Keyword     | Semantics                                      |
+|-------------|-------------------------------------------------|
+| `PRODUCE`   | Create named artifact at named path.            |
+| `BIND`      | Make irreversible decision. Lock with rationale.|
+|             | No deferral permitted on a BIND item.           |
+| `CONFIRM`   | Verify condition holds. Assert, do not decide.  |
+| `SURFACE`   | Flag finding to orchestrator. Stop. Do not      |
+|             | resolve. Do not act beyond the flag.            |
+| `DEFER`     | Explicitly not deciding. Name the owner and     |
+|             | gate where resolution belongs.                  |
+
+### 3.2 Context Keywords
+
+| Keyword     | Semantics                                      |
+|-------------|-------------------------------------------------|
+| `READ`      | Required context. Agent consumes before work.   |
+|             | Section-level specificity preferred.            |
+| `IGNORE`    | Isolation boundary. Content from IGNORE sources |
+|             | is treated as contamination.                    |
+
+### 3.3 Output Keywords
+
+| Keyword     | Semantics                                      |
+|-------------|-------------------------------------------------|
+| `REPORT`    | Structured handoff to orchestrator. Agent       |
+|             | returns exactly these items. Nothing more.      |
+| `EXIT`      | Binary pass/fail completion condition. Agent    |
+|             | self-checks every EXIT before declaring done.   |
+
+### 3.4 Scope Keywords
+
+| Keyword     | Semantics                                      |
+|-------------|-------------------------------------------------|
+| `ANCHOR`    | Traceable governing reference for this dispatch.|
+| `SOURCE`    | Origin section in governing document that       |
+|             | motivates a specific work item.                 |
+
+### 3.5 Extensibility
+
+The keyword set is frozen at v1.0.0. No new keywords in any
+1.x.y release.
+
+Extensions are carried as namespaced metadata on work items,
+envelope, or report. Namespace format: `x-{namespace}-{name}`.
+
+```yaml
+work_items:
+  - keyword: "BIND"
+    description: "choose superseding structure"
+    metadata:
+      x-contextos-seam: 4
+      x-contextos-source: "SPEC-027 §5"
+```
+
+Validators MUST ignore unknown `x-` metadata fields.
+Validators MUST reject unknown keywords.
+
+---
+
+## 4. Dispatch Envelope Schema
+
+A dispatch envelope carries an instruction from orchestrator to
+agent. Transport-agnostic. Serializable as YAML, JSON, TOML,
+MessagePack, protobuf, or fixed-width binary.
+
+### 4.1 Required Fields
 
 ```yaml
 adp_version: "1.0.0"
 
 dispatch:
-  agent: "impl-agent"
-  anchor: ["SPEC-027"]
+  agent: string          # agent identifier
+  anchor: [string]       # at least one traceable reference
+  
+context:
+  read: [ReadEntry]      # at least one entry
+
+exit: [string]           # at least one completion condition
+
+report: [string]         # at least one handoff item
+```
+
+### 4.2 Optional Fields
+
+```yaml
+dispatch:
+  model: string          # model identifier
+  tier: integer          # compression tier (1, 2, 3)
+  gate: string           # gate identifier
+  branch: string         # version control branch
 
 context:
-  read:
-    - path: "docs/specs/SPEC-027.md"
-      sections: ["§5"]
+  ignore: [string]       # isolation patterns
 
-work_items:
-  - keyword: "BIND"
-    description: "choose append-only superseding edge"
+produce: [ProduceEntry]  # output artifacts
 
-exit:
-  - "invariant test passes"
+work_items: [WorkItem]   # directive-bearing work items
+```
+
+### 4.3 Field Definitions
+
+**ReadEntry:**
+```yaml
+path: string             # file or resource path
+sections: [string]       # optional section references
+```
+
+**ProduceEntry:**
+```yaml
+path: string             # output artifact path
+action: string           # "create" | "modify"
+```
+
+**WorkItem:**
+```yaml
+keyword: string          # one of the 10 defined keywords
+description: string      # the directive content
+source: string           # optional — origin reference
+metadata: object         # optional — namespaced extensions
+```
+
+### 4.4 Constraint
+
+At least one of `produce` or `work_items` MUST be present.
+An envelope with neither is a validation failure — it
+instructs nothing.
+
+---
+
+## 5. Report Envelope Schema
+
+A report envelope carries results from agent to orchestrator.
+
+### 5.1 Required Fields
+
+```yaml
+adp_version: "1.0.0"
 
 report:
-  - "commit_hash"
+  agent: string
+  anchor: [string]
+  status: string         # "COMPLETE" | "BLOCKED" | "SURFACE"
+
+exit_results: [ExitResult]
+
+items: [ReportItem]
 ```
 
-## 10 Keywords
+### 5.2 Field Definitions
 
-| Keyword   | What it means                            |
-|-----------|------------------------------------------|
-| PRODUCE   | Create artifact at path                  |
-| BIND      | Make irreversible decision               |
-| CONFIRM   | Verify condition. Assert, don't decide   |
-| SURFACE   | Flag to orchestrator. Stop               |
-| DEFER     | Not deciding here. Name resolution owner |
-| READ      | Required context. Consume before work    |
-| IGNORE    | Isolation boundary. Do not read          |
-| REPORT    | Structured handoff items                 |
-| EXIT      | Completion condition. Binary pass/fail   |
-| ANCHOR    | Traceable governing reference            |
-
-Keywords are frozen at v1.0.0. Extensions via namespaced metadata (`x-{namespace}-{name}`).
-
-## 3 Compression Tiers
-
-| Tier | Judgment | Compression | Use when                        |
-|------|----------|-------------|---------------------------------|
-| T1   | High     | 40–50%      | Agent makes irreversible choices|
-| T2   | Medium   | 55–65%      | Agent interprets edge cases     |
-| T3   | Low      | 65–75%      | Agent executes decided shape    |
-
-## Validation
-
-Pure function. Envelope in, pass/fail out. No state. No network. Embeddable anywhere.
-
-```python
-from adp import validate
-
-result = validate(envelope)
-assert result.valid
+**ExitResult:**
+```yaml
+condition: string        # echoes the EXIT condition
+result: boolean          # pass or fail
 ```
 
-## Project Structure
-
-```
-adp-protocol/
-├── spec/ADP-1.md              # Protocol specification
-├── schema/
-│   ├── dispatch.schema.json   # Dispatch envelope schema
-│   └── report.schema.json     # Report envelope schema
-├── python/adp/                # Python reference implementation
-├── examples/                  # Tier 1, 2, 3 examples
-└── LICENSE
+**ReportItem:**
+```yaml
+key: string
+value: string
 ```
 
-## Status
+### 5.3 Status Values
 
-Pre-release. Spec finalized. Schema and reference implementation in progress.
+Three values. Fixed.
 
-## License
+| Status     | Semantics                                    |
+|------------|----------------------------------------------|
+| `COMPLETE` | All EXIT conditions passed. Work done.       |
+| `BLOCKED`  | Agent cannot proceed. `items` MUST include   |
+|            | at least one entry with key `blocker`        |
+|            | describing what is missing.                  |
+| `SURFACE`  | Agent found something requiring orchestrator |
+|            | judgment. `items` MUST include at least one  |
+|            | entry with key `finding`.                    |
 
-Apache 2.0
+### 5.4 Chaining Constraint
+
+Report items referencing produced artifacts MUST include the
+artifact path from the dispatch envelope's `produce` section.
+A report that references state outside the envelope is
+non-conformant.
+
+The report IS the handoff to the next agent. No separate
+chaining mechanism. The next agent's `context.read` includes
+the prior agent's report and/or produced artifacts.
+
+---
+
+## 6. Compression Tiers
+
+Compression ratio indexed to judgment density of the task.
+Tier selection is orchestrator's responsibility. The protocol
+defines what each tier retains and strips. Same keyword
+grammar across all tiers — different density.
+
+### Tier 1 — High Judgment (40–50% compression)
+
+Retains rationale, cross-references, tradeoff framing,
+SOURCE per work item. Agent makes irreversible decisions
+that shape downstream work.
+
+Use when: the agent must choose between competing options
+and the wrong choice cascades.
+
+### Tier 2 — Medium Judgment (55–65% compression)
+
+Retains constraints, assertion shapes, invariant references.
+Strips rationale and options-considered.
+
+Use when: the agent asserts against a shape already decided,
+but must interpret edge cases.
+
+### Tier 3 — Low Judgment (65–75% compression)
+
+Retains directives, paths, field names, EXIT conditions.
+Strips all rationale, all cross-references beyond immediate
+source. Pure imperative.
+
+Use when: the agent executes a shape already decided and
+tested. It needs coordinates, not cartography.
+
+### Tier Selection Guidance
+
+| Signal                                        | Tier |
+|-----------------------------------------------|------|
+| Work items contain BIND                       | 1    |
+| Work items contain only CONFIRM + PRODUCE     | 3    |
+| Work items mix BIND + CONFIRM                 | 2    |
+| Agent is expected to SURFACE findings         | 1–2  |
+| Agent executes against known passing criteria | 3    |
+
+---
+
+## 7. Validation Contract
+
+Validation is a pure function. Envelope in, result out. No
+network calls. No state. No model-specific logic.
+
+### 7.1 Dispatch Validation Rules
+
+| Rule | Check                                              |
+|------|----------------------------------------------------|
+| V-01 | `adp_version` present and parseable as semver      |
+| V-02 | `dispatch.agent` non-empty string                  |
+| V-03 | `dispatch.anchor` non-empty array                  |
+| V-04 | `context.read` non-empty array                     |
+| V-05 | `exit` non-empty array                             |
+| V-06 | `report` non-empty array                           |
+| V-07 | At least one of `produce` or `work_items` present  |
+| V-08 | Every `work_items[].keyword` in defined vocabulary  |
+| V-09 | No unknown top-level fields outside schema         |
+| V-10 | `dispatch.tier` if present is 1, 2, or 3           |
+
+### 7.2 Report Validation Rules
+
+| Rule | Check                                              |
+|------|----------------------------------------------------|
+| R-01 | `adp_version` present and parseable as semver      |
+| R-02 | `report.agent` non-empty string                    |
+| R-03 | `report.anchor` non-empty array                    |
+| R-04 | `report.status` is COMPLETE, BLOCKED, or SURFACE   |
+| R-05 | `exit_results` non-empty array                     |
+| R-06 | `items` non-empty array                            |
+| R-07 | If status BLOCKED: items contains key `blocker`    |
+| R-08 | If status SURFACE: items contains key `finding`    |
+
+### 7.3 Version Compatibility
+
+Parsers MUST reject unknown major versions.
+Parsers MUST accept unknown minor versions (ignore unknown
+optional fields).
+Unknown `x-` namespaced metadata fields are always ignored.
+
+---
+
+## 8. Deduplication Rule
+
+A dispatch envelope MUST NOT carry content that is structurally
+available to the agent through its READ context. If a role
+boundary, commit format, or behavioral constraint exists in a
+document the agent is directed to READ, restating it in the
+dispatch is redundant and non-conformant.
+
+Exception: EXIT conditions that tighten or specialize the
+agent's general contract for this specific dispatch ARE
+included. They are additive, not duplicative.
+
+Deduplication is a SHOULD for v1.0.0 (not mechanically
+enforced by the validator — requires semantic understanding
+of READ content). Future versions may introduce content-hash
+deduplication.
+
+---
+
+## 9. Versioning
+
+Semver. `adp_version` field in every envelope.
+
+| Change                            | Bump  |
+|-----------------------------------|-------|
+| Keyword addition or removal       | Major |
+| Envelope schema breaking change   | Major |
+| New optional field                | Minor |
+| Spec clarification, no schema Δ   | Patch |
+
+Keywords are frozen at v1.0.0. A major bump is not expected.
+If 2.0.0 is ever needed, the original design was wrong.
+
+---
+
+## 10. Relationship to Existing Standards
+
+| Standard | Relationship                                   |
+|----------|------------------------------------------------|
+| RFC 2119 | Complementary vocabularies. RFC 2119 governs   |
+|          | specification documents (system behavior). ADP |
+|          | governs dispatch envelopes (agent behavior).   |
+|          | An ADP envelope may quote RFC 2119 terms when  |
+|          | referencing spec constraints. ADP keywords do  |
+|          | not appear in specs.                           |
+| MCP      | Orthogonal layers. MCP governs tool calls      |
+|          | (agent → service). ADP governs instructions    |
+|          | (orchestrator → agent).                        |
+| OpenAPI  | Different concerns. OpenAPI describes APIs.    |
+|          | ADP describes instruction envelopes.           |
+| HTTP     | ADP is payload schema, not transport. ADP      |
+|          | envelopes can ride on HTTP, file I/O, stdin,   |
+|          | message queues, or hardware buses.             |
+
+---
+
+## 11. What ADP Is Not
+
+- Not a prompt engineering framework.
+- Not model-specific.
+- Not framework-coupled.
+- Not transport-specific.
+- Not an agent runtime or orchestrator.
+
+---
+
+## Revision Log
+
+| Date       | Change                                         |
+|------------|-------------------------------------------------|
+| 2026-06-26 | Initial specification. Keywords frozen. Four    |
+|            | open questions closed: extensibility (freeze +  |
+|            | namespace), negotiation (not in v1), chaining   |
+|            | (report IS handoff), versioning (semver, major  |
+|            | not expected).                                  |

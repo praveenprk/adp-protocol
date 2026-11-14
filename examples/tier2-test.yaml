@@ -1,0 +1,40 @@
+adp_version: "1.0.0"
+
+dispatch:
+  agent: "test-agent"
+  model: "opus"
+  tier: 2
+  anchor:
+    - "SPEC-027"
+  gate: "TEST"
+  branch: "rfc/RFC-027-destructive-operation-governance"
+
+context:
+  read:
+    - path: "docs/specs/SPEC-027.md"
+    - path: "docs/design/destructive-op-governance-contract.md"
+  ignore:
+    - "contextos/*.py"
+    - "tests/spec/test_spec_0*.py"
+
+produce:
+  - path: "tests/spec/test_spec_027_destructive_ops.py"
+    action: "create"
+
+work_items:
+  - keyword: "PRODUCE"
+    description: "xfail test per INV-027-01 through INV-027-18. One test function per invariant. Fixture state per DESIGN doc assertion shapes"
+  - keyword: "CONFIRM"
+    description: "every INV in SPEC-027 has exactly one test function"
+
+exit:
+  - "test file runs with all tests xfail"
+  - "xfail_baseline.txt updated to new count"
+  - "no implementation file modified"
+  - "no SPEC/RFC modified"
+
+report:
+  - "file_path"
+  - "commit_hash"
+  - "xfail_count"
+  - "inv_coverage_list"
