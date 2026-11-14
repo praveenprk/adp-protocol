@@ -11,6 +11,25 @@
 
 ---
 
+## Outcome and impact
+
+**In one line:** this changes what ADP-1's words mean, not what any
+validator does, and it unblocks the fixes for the CRITICAL defects.
+
+| Area | Effect when applied |
+|------|---------------------|
+| ADP-1 text | The 10 uppercase key words become binding with BCP 14 meaning. Lowercase words stay plain English. The 18 V-/R- rules become explicit MUST-reject requirements. |
+| Envelopes and validators | No envelope changes verdict. The schemas already reject what the rules reject, except V-01, which stays open as ADP-D-009. |
+| Version | ADP-1 1.0.0 → 1.0.1 (patch) |
+| Defect register | ADP-D-012 → RESOLVED. ADP-D-008 and D-009 get a firm basis for their grades. |
+| Downstream | CRITICAL fixes (D-003/006/007, D-004/009) can be written as MUST rules. The Internet-Draft needs the BCP 14 statement anyway. |
+| Risk | ADP-0 §5.5 reading of C2; see Conformance impact. |
+
+Merging this proposal does not apply it. Application is a separate
+change (see Application).
+
+---
+
 ## Anchor
 
 **ADP-D-012** (HIGH). ADP-1 uses MUST, MUST NOT and SHOULD in ten
