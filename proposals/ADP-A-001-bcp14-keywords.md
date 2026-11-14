@@ -196,6 +196,7 @@ together with the reasoning below.
 
 ## Decision
 
-Pending. To be recorded by the maintainer (ADP-0 §5.3) as one line
-beginning `ACCEPTED`, `REJECTED` or `DEFERRED`, with the date and the
-reason.
+ACCEPTED 2026-11-15 by the maintainer (ADP-0 §5.3). Apply as written.
+§5.5 reading: C2 does not touch validation. It adds, removes and
+changes no rule, and no schema verdict changes, so `conformance/` is
+not created here. It is created by ADP-A-002.
