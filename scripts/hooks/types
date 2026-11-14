@@ -1,0 +1,15 @@
+# Commit types allowed in the subject line (AGENTS.md "Commits"). One per line.
+# Base set from eng-principles ENG-STD-005 §1.2; it MUST NOT be reduced.
+feat
+fix
+test
+refactor
+docs
+chore
+design
+# ADP additions
+spec
+schema
+governance
+conformance
+experiment
