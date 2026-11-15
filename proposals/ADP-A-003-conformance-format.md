@@ -250,17 +250,18 @@ CI check fails until they are.
 
 ## Questions for the maintainer
 
-Answers were given in a working session and are quoted as English
-translations. They are recorded here so the proposal reads complete. They are
-not the Decision (ADP-0 §5.3).
+For Q1 to Q4, the recommendation below was sent to the maintainer in a
+working session and matches the drafted default. The maintainer's answers were
+given in that session and are quoted as English translations. They are recorded
+here so the proposal reads complete. They are not the Decision (ADP-0 §5.3).
 
-| # | Question | Draft default | Maintainer answer | Effect on this draft |
-|---|----------|---------------|-------------------|----------------------|
-| Q1 | Should the format live in ADP-0 as a new §5.6 (as drafted), or in a new document? | ADP-0 §5.6 (A1). | (translated) "Go with your recommendation." | Settled as drafted. |
-| Q2 | JSON vectors, as drafted? | Yes (A3). | (translated) "Go with your recommendation." | Settled as drafted. |
-| Q3 | Should known-defect markers fail CI when stale (§5.6.4)? | Yes. Otherwise a fixed defect could leave a misleading marker behind. | (translated) "Go with your recommendation." | Settled as drafted. |
-| Q4 | Should the ADP-1 vectors be part of this proposal (C2), or a separate one? | Part of this one (A6). They are the format's proof and change no verdict. | (translated) "Go with your recommendation." | Settled as drafted. |
-| Q5 | The ADP-A-001 Decision line still names ADP-A-002 as the creator of `conformance/`. Add a note to it? | Your call. Only the maintainer may amend a Decision (ADP-0 §5.3). | Resolved by the maintainer in PR #10 (commit 618e934). | Settled. No change to this draft. |
+| # | Question | Recommendation (setting and reason) | Maintainer answer | Effect on this draft |
+|---|----------|-------------------------------------|-------------------|----------------------|
+| Q1 | Should the format live in ADP-0 as a new §5.6 (as drafted), or in a new document? | **ADP-0 §5.6, not a new document.** The format governs how normative artifacts are written and checked, which is ADP-0's remit, and ADP-0 §5.5 already owns the suite (A1 rejected). | Accepted the recommendation. Translated: "Go with your recommendation." | Settled as drafted. |
+| Q2 | JSON vectors, as drafted? | **JSON, not YAML.** YAML 1.1 parsers read some unquoted scalars as booleans or numbers, so a vector could change meaning between parsers. JSON has one reading (A3 rejected). | Accepted the recommendation. Translated: "Go with your recommendation." | Settled as drafted. |
+| Q3 | Should known-defect markers fail CI when stale (§5.6.4)? | **Yes: a stale `known_defect` marker fails CI.** Otherwise a fixed defect could leave a misleading marker behind. | Accepted the recommendation. Translated: "Go with your recommendation." | Settled as drafted. |
+| Q4 | Should the ADP-1 vectors be part of this proposal (C2), or a separate one? | **In this proposal (C2), not separate.** The 26 vectors prove the format and change no verdict (A6 rejected). | Accepted the recommendation. Translated: "Go with your recommendation." | Settled as drafted. |
+| Q5 | The ADP-A-001 Decision line still names ADP-A-002 as the creator of `conformance/`. Add a note to it? | No recommendation. Only the maintainer may amend a Decision (ADP-0 §5.3). | Resolved by the maintainer in PR #10 (commit 618e934). | Settled. No change to this draft. |
 
 ---
 
