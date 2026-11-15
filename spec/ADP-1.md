@@ -4,10 +4,10 @@
 |--------------|-----------------------------------------|
 | **ID**       | ADP-1                                   |
 | **Title**    | Agent Dispatch Protocol                 |
-| **Version**  | 1.0.0                                   |
+| **Version**  | 1.0.1                                   |
 | **Status**   | Draft                                   |
 | **License**  | Apache 2.0                              |
-| **Date**     | 2026-06-26                              |
+| **Date**     | 2026-11-15                              |
 
 ---
 
@@ -22,6 +22,16 @@ Framework-agnostic.
 ADP governs the envelope, not the content. It does not tell agents
 what to think. It structures how they receive instructions and
 return results.
+
+---
+
+## Conventions
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+"OPTIONAL" in this document are to be interpreted as described in
+BCP 14 (RFC 2119, RFC 8174) when, and only when, they appear in all
+capitals, as shown here.
 
 ---
 
@@ -305,6 +315,9 @@ tested. It needs coordinates, not cartography.
 Validation is a pure function. Envelope in, result out. No
 network calls. No state. No model-specific logic.
 
+A validator MUST reject a dispatch envelope that fails any rule in
+§7.1, and MUST reject a report envelope that fails any rule in §7.2.
+
 ### 7.1 Dispatch Validation Rules
 
 | Rule | Check                                              |
@@ -417,3 +430,6 @@ If 2.0.0 is ever needed, the original design was wrong.
 |            | namespace), negotiation (not in v1), chaining   |
 |            | (report IS handoff), versioning (semver, major  |
 |            | not expected).                                  |
+| 2026-11-15 | 1.0.1. Key words per BCP 14 (Conventions);      |
+|            | §7.1/§7.2 rules bind validators (§7). ADP-A-001, |
+|            | resolves ADP-D-012.                             |
