@@ -318,17 +318,20 @@ read the same way whichever is applied first.
 
 ## Questions for the maintainer
 
-Answers come from the maintainer's review on PR #8. They are recorded here so
-the proposal reads complete. They are not the Decision (ADP-0 §5.3).
+Answers to Q1, Q2, Q3 and Q5's first reply come from the maintainer's review
+on PR #8 and are quoted verbatim. Answers to Q1a and Q4, and the follow-up
+answer to Q5, were given in a working session and are quoted as English
+translations. They are recorded here so the proposal reads complete. They are
+not the Decision (ADP-0 §5.3).
 
 | # | Question | Maintainer answer | Effect on this draft |
 |---|----------|-------------------|----------------------|
-| Q1 | For codebase create and delete: may an agent carry out the act once a human has signed, and at what granularity? | "What kind of creation and deletion? There could be a boundary for smaller blast radius. Agent MAY carry it out with a per-event or per-session per-cycle human sign record." | Added §2.1 (six event classes, radius R1 to R3, cycle and session defined). G-9 now carries `classes`, `boundary` and `span`. |
+| Q1 | For codebase create and delete: may an agent carry out the act once a human has signed, and at what granularity? | "what kind of creation and deletion? / there could be a boundary for smaller blast radius / agent MAY carry it out with a per-event or per-session per-cycle human sign record" | Added §2.1 (six event classes, radius R1 to R3, cycle and session defined). G-9 now carries `classes`, `boundary` and `span`. |
 | Q1a | How wide may an R2 record's span be? | "Configurable, up to session. Let the user decide. Choose your best recommendation." | Settled. In G-9, R2 allows `event` or `session`, and `span` is required with no default. Recommendation below. |
-| Q2 | Should the human-signed tier also include data deletion, schema migration and security changes? | "Correct. Don't raise risk class." | Settled. Kept to the two events. |
-| Q3 | Which signature mechanism? | "Field first, algo later." | Settled. G-6 and G-9 fix the fields only. |
+| Q2 | Should the human-signed tier also include data deletion, schema migration and security changes? | "correct. dont raise risk class." | Settled. Kept to the two events. |
+| Q3 | Which signature mechanism? | "field first, algo later" | Settled. G-6 and G-9 fix the fields only. |
 | Q4 | Does "codebase" include the hosted remote? | "Go with best recommendation." | Settled as drafted: yes. Recommendation below. |
-| Q5 | Should this proposal create `conformance/`? | "Option (b)." | Settled. ADP-A-003 creates `conformance/` and its format. This proposal adds only ADP-2 vectors. |
+| Q5 | Should this proposal create `conformance/`? | Review: "will need more context to answer". Follow-up (translated): "Option (b)." | Settled. ADP-A-003 creates `conformance/` and its format. This proposal adds only ADP-2 vectors. |
 
 ### Recommendation for Q1a: R2 span
 
