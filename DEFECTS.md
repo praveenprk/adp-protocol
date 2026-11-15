@@ -136,6 +136,8 @@ Severity    : CRITICAL
 Status      : OPEN
 Resolved by : —
 Notes       : Non-conformant envelope accepted.
+              Vector `conformance/adp-1/7.3/fail-unknown-major.json`
+              carries this marker (ADP-A-003, d15282b).
 
 ### ADP-D-005
 Artifact    : Legal — LICENSE (absent); README.md; spec/ADP-1.md header
@@ -239,6 +241,8 @@ Notes       : Conformant rejected and non-conformant accepted.
               resolving proposal.
               ADP-1 1.0.1 (ADP-A-001 C2, 7a55eb5): the §7 tables now
               bind validators. Grade stays as filed (ADP-0 §4.5).
+              Vector `conformance/adp-1/V-01/fail-leading-zero.json`
+              carries this marker (ADP-A-003, d15282b).
 
 ### ADP-D-010
 Artifact    : Normative — spec/ADP-1.md §6 "Tier Selection Guidance"
