@@ -43,11 +43,15 @@ f_ev=$(copy ev);         sed -i.bak 's/harness: `major-2` → True/harness: `maj
 f_del=$(copy del);       sed -i.bak 's/^### ADP-D-017$/### gone/' "$f_del"
 f_status=$(copy status); sed -i.bak '/^### ADP-D-001$/,/^Status/s/^Status      : OPEN/Status      : RESOLVED/' "$f_status"
 f_badst=$(copy badst);   sed -i.bak '/^### ADP-D-001$/,/^Status/s/^Status      : OPEN/Status      : FIXED/' "$f_badst"
-f_good=$(copy good);     entry ADP-D-018 LOW    >> "$f_good"
-f_gap=$(copy gap);       entry ADP-D-019 LOW    >> "$f_gap"
-f_dup=$(copy dup);       entry ADP-D-017 LOW    >> "$f_dup"
-f_badsv=$(copy badsv);   entry ADP-D-018 URGENT >> "$f_badsv"
-f_miss=$(copy miss);     entry ADP-D-018 LOW | sed '/^Evidence/d' >> "$f_miss"
+# IDs relative to the register's last entry, so filing a defect never
+# turns a case into a duplicate-ID refusal.
+last=$(sed -n 's/^### ADP-D-\([0-9][0-9]*\)$/\1/p' DEFECTS.md | tail -n 1)
+id() { printf 'ADP-D-%03d' "$(expr "$last" + "$1")"; }
+f_good=$(copy good);     entry "$(id 1)" LOW    >> "$f_good"
+f_gap=$(copy gap);       entry "$(id 2)" LOW    >> "$f_gap"
+f_dup=$(copy dup);       entry "$(id 0)" LOW    >> "$f_dup"
+f_badsv=$(copy badsv);   entry "$(id 1)" URGENT >> "$f_badsv"
+f_miss=$(copy miss);     entry "$(id 1)" LOW | sed '/^Evidence/d' >> "$f_miss"
 
 echo "# check_defects"
 check pass   "unchanged register"                     defects "$f"

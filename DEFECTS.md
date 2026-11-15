@@ -376,3 +376,169 @@ Notes       : README is informative (ADP-0 §3). The tree describes
               intended layout, not actual layout; it also omits
               `proposals/`, `conformance/`, `DEFECTS.md` defined by
               ADP-0 §9.
+
+### ADP-D-018
+Artifact    : Normative — spec/ADP-2.md §5 G-9, §6
+Says        : §6 line 182–183: "`validate(dispatch, grant_chain)` is
+              a pure function … It checks G-1 to G-7 and G-9 against
+              the documents it is given."
+Does        : G-9 (line 159–160) is a property of a human-signed
+              codebase record, which is not one of the validator's
+              inputs. The record also has no document format: G-9
+              names `classes`, `boundary` and `span` but defines no
+              keys for `boundary` and no signature fields.
+Evidence    : At 12e644b:
+              `grep -n "validate(dispatch, grant_chain)\|record MUST state\|boundary\`: the" spec/ADP-2.md`
+              → lines 160, 162, 182
+Severity    : HIGH
+Status      : OPEN
+Resolved by : —
+Notes       : Internal contradiction in normative text: the
+              validator must check a document it is never given.
+              Vectors under conformance/adp-2/G-9 use input
+              `{record}` with assumed keys (ADP-A-002 application,
+              eee0003).
+
+### ADP-D-019
+Artifact    : Normative — spec/ADP-2.md §4, §5 G-4, G-7
+Says        : G-4 line 144–145: paths "MUST match" `scope.read` /
+              `scope.write`. G-7 line 152: "`scope.write` MUST NOT
+              overlap `protected`." §4 lines 121–125 call these
+              "globs".
+Does        : No glob dialect is defined (`*`, `**`, character
+              classes, case, leading `/`), and no meaning is given
+              for "overlap" between two glob sets. Two validators can
+              give different verdicts on the same grant.
+Evidence    : At 12e644b:
+              `grep -n "globs\|MUST match \`scope\|MUST NOT overlap" spec/ADP-2.md`
+              → lines 87, 90, 121, 122, 125, 144, 152
+Severity    : HIGH
+Status      : OPEN
+Resolved by : —
+Notes       : Departs from the CRITICAL row: whether a given path
+              matches is undefined, so no envelope can be shown to
+              be wrongly accepted or rejected. The defect is a MUST
+              with no defined outcome (same reasoning as ADP-D-007).
+              ADP-2 vectors use only paths whose verdict holds in any
+              common dialect.
+
+### ADP-D-020
+Artifact    : Normative — spec/ADP-2.md §4.1, §5 G-1
+Says        : G-1 line 138: "A dispatch MUST list exactly one grant
+              id in `dispatch.anchor`."
+Does        : `dispatch.anchor` also carries other references (ADP-1
+              §4.1, e.g. `SPEC-027`). ADP-2 does not say how a
+              validator tells a grant id apart from them: by format,
+              or by membership in the grant chain it is given.
+Evidence    : At 12e644b:
+              `grep -n "grant id\|grant \`id\`" spec/ADP-2.md` → lines 130, 138
+Severity    : HIGH
+Status      : OPEN
+Resolved by : —
+Notes       : Departs from the CRITICAL row for the same reason as
+              ADP-D-019: the count G-1 checks is undefined.
+
+### ADP-D-021
+Artifact    : Normative — spec/ADP-2.md §3, §5 G-3, §6
+Says        : §3 lines 89 and 93: `CONFIRM` and `EXIT` imply
+              `AT-VERIFY` "if checking the condition requires running
+              anything". G-3 requires the implied types to be a subset
+              of the grant's types. §6: the validator is a pure
+              function over the documents.
+Does        : Whether a condition such as "tests pass" requires
+              running anything is not visible in the envelope, so a
+              pure validator cannot compute the implied types, and
+              cannot decide G-3 for any dispatch with `exit`.
+Evidence    : At 12e644b:
+              `grep -n "requires running anything" spec/ADP-2.md` → lines 89, 93
+Severity    : HIGH
+Status      : OPEN
+Resolved by : —
+Notes       : Internal contradiction in normative text: G-3 must be
+              checked by a pure function, and its input depends on
+              facts outside the documents.
+
+### ADP-D-022
+Artifact    : Normative — spec/ADP-2.md §4; schema/grant.schema.json
+Says        : §4 lines 106–125 list the grant fields. Only `root`
+              carries a condition ("required unless parent is
+              present", line 111).
+Does        : ADP-2 does not say which other fields are required,
+              what grammar `adp_grant_version` follows, or whether
+              unknown fields are allowed. schema/grant.schema.json
+              makes every unconditioned grant-level field required
+              and allows unknown fields. Neither choice has a
+              normative basis.
+Evidence    : At 12e644b:
+              `grep -n "adp_grant_version\|required unless parent" spec/ADP-2.md` → lines 106, 111
+              `grep -n '"required"' schema/grant.schema.json`
+Severity    : HIGH
+Status      : OPEN
+Resolved by : —
+Notes       : Departs from the CRITICAL row: conformance of a grant
+              with a missing field is undefined, so no verdict can be
+              shown wrong. Same shape as ADP-D-007 (schema rule
+              without normative basis).
+
+### ADP-D-023
+Artifact    : Process — spec/ADP-0.md §9
+Says        : §9 is the repository layout. Line 373:
+              "conformance/  # created by first validation proposal
+              (§5.5)".
+Does        : The tree lists `spec/ADP-1.md` only (line 371), not
+              `spec/ADP-2.md`, and still describes `conformance/` as
+              to be created, though ADP-A-003 created it.
+Evidence    : At 12e644b:
+              `grep -n "ADP-1.md \|created by first" spec/ADP-0.md` → lines 371, 373
+              `ls spec conformance`
+Severity    : LOW
+Status      : OPEN
+Resolved by : —
+Notes       : ADP-0 §4.4 has no row for process documents. Graded as
+              the "Informative artifact contradicts normative text"
+              row, because the layout describes files and binds no
+              envelope.
+
+### ADP-D-024
+Artifact    : Normative — spec/ADP-1.md §7.1, §7.2;
+              schema/dispatch.schema.json; schema/report.schema.json
+Says        : §7: "A validator MUST reject a dispatch envelope that
+              fails any rule in §7.1, and MUST reject a report
+              envelope that fails any rule in §7.2." The 23 rules
+              are the validation contract.
+Does        : The schemas also reject envelopes that fail no rule:
+              a produce or read entry without `path`, a work item
+              without `description`, an exit result without
+              `condition` or `result`, a report item without `key` or
+              `value`. These follow the §4.3/§5.2 field definitions,
+              which never say which fields are required. A validator
+              that implements only §7 accepts them.
+Evidence    : At 12e644b:
+              `grep -n '"required": \["path"\]\|"required": \["keyword", "description"\]\|"required": \["condition", "result"\]\|"required": \["key", "value"\]' schema/*.json`
+              → dispatch lines 99, 115, 131; report lines 96, 111
+              `grep -cE '^\| [VR]-[0-9]{2} ' spec/ADP-1.md` → 23, none
+              naming these fields.
+              The minimal valid dispatch vector with
+              `produce: [{"action": "create"}]` → schema verdict False.
+Severity    : HIGH
+Status      : OPEN
+Resolved by : —
+Notes       : Departs from the CRITICAL row: ADP-1 does not say
+              whether such envelopes are conformant, so neither
+              verdict can be shown wrong. ADP-A-001 A5 and ADP-A-005
+              ("Not in this proposal") deferred this.
+
+### ADP-D-025
+Artifact    : Normative — spec/ADP-1.md §8
+Says        : Line 382: "A dispatch envelope MUST NOT carry content
+              that is structurally available to the agent through its
+              READ context."
+Does        : Line 392: "Deduplication is a SHOULD for v1.0.0 (not
+              mechanically enforced by the validator …)". The same
+              requirement is stated as MUST and as SHOULD.
+Evidence    : At 12e644b:
+              `grep -n "MUST NOT carry\|Deduplication is a SHOULD" spec/ADP-1.md` → lines 382, 392
+Severity    : HIGH
+Status      : OPEN
+Resolved by : —
+Notes       : Internal contradiction in normative text.
