@@ -1,0 +1,63 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.0.0",
+    "kind": "dispatch"
+  },
+  "rules": [
+    "V-01",
+    "V-02",
+    "V-03",
+    "V-04",
+    "V-05",
+    "V-06",
+    "V-07",
+    "V-08",
+    "V-09",
+    "V-10"
+  ],
+  "expect": "pass",
+  "description": "Dispatch with every optional field set to a valid value, so it passes every rule in §7.1.",
+  "input": {
+    "adp_version": "1.0.0",
+    "dispatch": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ],
+      "model": "m",
+      "tier": 2,
+      "gate": "CODE",
+      "branch": "b"
+    },
+    "context": {
+      "read": [
+        {
+          "path": "docs/spec.md"
+        }
+      ],
+      "ignore": [
+        "tests/**"
+      ]
+    },
+    "work_items": [
+      {
+        "keyword": "PRODUCE",
+        "description": "write module"
+      }
+    ],
+    "exit": [
+      "tests pass"
+    ],
+    "report": [
+      "commit_hash"
+    ],
+    "produce": [
+      {
+        "path": "src/a.py",
+        "action": "create"
+      }
+    ]
+  }
+}

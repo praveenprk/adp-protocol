@@ -1,0 +1,35 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.0.0",
+    "kind": "report"
+  },
+  "rules": [
+    "R-02"
+  ],
+  "expect": "fail",
+  "description": "Report whose report.agent is the empty string.",
+  "input": {
+    "adp_version": "1.0.0",
+    "report": {
+      "agent": "",
+      "anchor": [
+        "SPEC-001"
+      ],
+      "status": "COMPLETE"
+    },
+    "exit_results": [
+      {
+        "condition": "tests pass",
+        "result": true
+      }
+    ],
+    "items": [
+      {
+        "key": "commit_hash",
+        "value": "abc"
+      }
+    ]
+  }
+}
