@@ -359,16 +359,19 @@ No existing vector's `expect` changes.
 
 ## Questions for the maintainer
 
+For Q1 to Q5, the recommendation below was sent to the maintainer in a
+working session and matches the drafted default. The maintainer's answers
+were given in that session and are quoted as English translations.
 These answers shape the draft. They do not accept it. Only the Decision
 section below accepts or rejects the proposal (ADP-0 §5.3).
 
 | # | Question | Recommendation (setting and reason) | Maintainer answer | Effect on this draft |
 |---|----------|-------------------------------------|-------------------|----------------------|
-| Q1 | Where do envelope- and report-level extensions go? | **A top-level `metadata` object on each envelope, as on work items. Bare `x-` keys elsewhere stay unknown fields.** One place for extensions, and V-09 keeps catching typos (A1 rejected). | — | — |
-| Q2 | When are unknown fields ignored (ADP-D-003)? | **Only when the envelope's minor version is higher than any minor the validator implements. Otherwise they are rejected at every level.** Old validators can read newer minors, and typos in known versions are still caught (A2, A3 rejected). | — | — |
-| Q3 | V-09 says "top-level", but the schemas check every level, and reports have no rule. Align the text with the schemas? | **Yes: V-09 covers every §4 object, and new R-10 covers every §5 object.** It matches what the published schemas already enforce, so no envelope's verdict changes (A4 rejected). | — | — |
-| Q4 | What character set do `metadata` keys use (ADP-D-007)? | **The schema's existing pattern `^x-[a-z]+-[a-z0-9-]+$`, with any other key rejected (V-12, R-11).** No verdict changes, and keys stay comparable (A5 rejected). | — | — |
-| Q5 | Bump class? | **Minor, 1.0.2 → 1.1.0.** It adds a new optional field and one relaxation, and no published-schema verdict tightens. | — | — |
+| Q1 | Where do envelope- and report-level extensions go? | **A top-level `metadata` object on each envelope, as on work items. Bare `x-` keys elsewhere stay unknown fields.** One place for extensions, and V-09 keeps catching typos (A1 rejected). | Accepted the recommendation. Translated: "Go with rec, Q1-Q5 all yes, chosen as sensible defaults and settings." | Settled as drafted. |
+| Q2 | When are unknown fields ignored (ADP-D-003)? | **Only when the envelope's minor version is higher than any minor the validator implements. Otherwise they are rejected at every level.** Old validators can read newer minors, and typos in known versions are still caught (A2, A3 rejected). | Accepted the recommendation. Translated: "Go with rec, Q1-Q5 all yes, chosen as sensible defaults and settings." | Settled as drafted. |
+| Q3 | V-09 says "top-level", but the schemas check every level, and reports have no rule. Align the text with the schemas? | **Yes: V-09 covers every §4 object, and new R-10 covers every §5 object.** It matches what the published schemas already enforce, so no envelope's verdict changes (A4 rejected). | Accepted the recommendation. Translated: "Go with rec, Q1-Q5 all yes, chosen as sensible defaults and settings." | Settled as drafted. |
+| Q4 | What character set do `metadata` keys use (ADP-D-007)? | **The schema's existing pattern `^x-[a-z]+-[a-z0-9-]+$`, with any other key rejected (V-12, R-11).** No verdict changes, and keys stay comparable (A5 rejected). | Accepted the recommendation. Translated: "Go with rec, Q1-Q5 all yes, chosen as sensible defaults and settings." | Settled as drafted. |
+| Q5 | Bump class? | **Minor, 1.0.2 → 1.1.0.** It adds a new optional field and one relaxation, and no published-schema verdict tightens. | Accepted the recommendation. Translated: "Go with rec, Q1-Q5 all yes, chosen as sensible defaults and settings." | Settled as drafted. |
 
 ---
 
