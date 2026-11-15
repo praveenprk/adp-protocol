@@ -308,15 +308,18 @@ removing them, or if the markers are removed without the schema change
 
 ## Questions for the maintainer
 
+For Q1 to Q4, the recommendation below was sent to the maintainer in a
+working session and matches the drafted default. The maintainer's answers
+were given in that session and are quoted as English translations.
 These answers shape the draft. They do not accept it. Only the Decision
 section below accepts or rejects the proposal (ADP-0 §5.3).
 
 | # | Question | Recommendation (setting and reason) | Maintainer answer | Effect on this draft |
 |---|----------|-------------------------------------|-------------------|----------------------|
-| Q1 | Are pre-release (`1.0.0-rc.1`) and build metadata (`1.0.0+build.5`) suffixes allowed in `adp_version`? | **Allowed; compatibility uses the major only.** V-01 already says "semver", and SemVer allows them. Rejecting them would change the spec to match a wrong schema (A1 rejected). | — | — |
-| Q2 | Does "semver" in ADP-1 1.0.0 mean SemVer 2.0.0? | **Yes, so this is a patch (1.0.2) erratum.** 2.0.0 has been the current SemVer since 2013, and ADP-D-009 was graded on that reading. If no, rejecting `01.0.0` is a Major change (ADP-0 §7). | — | — |
-| Q3 | Should the major check be new rules V-11/R-09, or part of V-01/R-01? | **New rules V-11/R-09.** One check per rule, so a failure names its cause, and the coverage check covers it (A2, A5 rejected). | — | — |
-| Q4 | Should the `"1.0.0\n"` newline case be fixed here and noted on ADP-D-009, or filed as a new defect? | **Fix it here and add a Notes line on ADP-D-009.** Same rule, same pattern, same root cause (A3 rejected). | — | — |
+| Q1 | Are pre-release (`1.0.0-rc.1`) and build metadata (`1.0.0+build.5`) suffixes allowed in `adp_version`? | **Allowed; compatibility uses the major only.** V-01 already says "semver", and SemVer allows them. Rejecting them would change the spec to match a wrong schema (A1 rejected). | Accepted the recommendation. Translated: "Go with rec, Q1-Q4 all yes as sensible defaults and decisions." | Settled as drafted. |
+| Q2 | Does "semver" in ADP-1 1.0.0 mean SemVer 2.0.0? | **Yes, so this is a patch (1.0.2) erratum.** 2.0.0 has been the current SemVer since 2013, and ADP-D-009 was graded on that reading. If no, rejecting `01.0.0` is a Major change (ADP-0 §7). | Accepted the recommendation. Translated: "Go with rec, Q1-Q4 all yes as sensible defaults and decisions." | Settled as drafted. |
+| Q3 | Should the major check be new rules V-11/R-09, or part of V-01/R-01? | **New rules V-11/R-09.** One check per rule, so a failure names its cause, and the coverage check covers it (A2, A5 rejected). | Accepted the recommendation. Translated: "Go with rec, Q1-Q4 all yes as sensible defaults and decisions." | Settled as drafted. |
+| Q4 | Should the `"1.0.0\n"` newline case be fixed here and noted on ADP-D-009, or filed as a new defect? | **Fix it here and add a Notes line on ADP-D-009.** Same rule, same pattern, same root cause (A3 rejected). | Accepted the recommendation. Translated: "Go with rec, Q1-Q4 all yes as sensible defaults and decisions." | Settled as drafted. |
 
 ---
 
