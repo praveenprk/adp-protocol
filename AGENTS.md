@@ -65,6 +65,7 @@ repository. Report what a check printed, not what it should print.
 | No push to `main`, no force-push, no remote deletion (local guardrail) | `scripts/hooks/pre-push` |
 | Schemas pass the metaschema; examples validate | CI job `schema` |
 | `schema/` changes need an ACCEPTED proposal | CI job `schema` (`scripts/ci/check-schema-gate`) |
+| Conformance vectors follow ADP-0 §5.6, cover every rule, and match the schemas | CI job `schema` (`scripts/ci/check_conformance.py`) |
 | `DEFECTS.md` append-only, IDs sequential, fields valid | CI job `defects` |
 | Everything else | Review by the maintainer |
 

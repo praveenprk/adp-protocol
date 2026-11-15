@@ -79,6 +79,7 @@ adp-protocol/
 ├── schema/
 │   ├── dispatch.schema.json   # Dispatch envelope schema
 │   └── report.schema.json     # Report envelope schema
+├── conformance/               # Conformance vectors (ADP-0 §5.6)
 ├── python/adp/                # Python reference implementation
 ├── examples/                  # Tier 1, 2, 3 examples
 └── LICENSE
