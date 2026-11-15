@@ -4,7 +4,7 @@
 |--------------|-----------------------------------------|
 | **ID**       | ADP-0                                   |
 | **Title**    | Specification Governance and Change Process |
-| **Version**  | 1.0.0                                   |
+| **Version**  | 1.1.0                                   |
 | **Status**   | Draft                                   |
 | **License**  | Apache 2.0                              |
 | **Date**     | 2026-11-15                              |
@@ -243,6 +243,66 @@ proposal accepted under ADP-0 that touches validation MUST create
 reference implementation may claim ADP conformance before
 `conformance/` exists.
 
+### 5.6 Conformance suite format
+
+#### 5.6.1 Layout
+
+```
+conformance/
+└── <doc>/                  # adp-1, adp-2, … (lowercase document id)
+    └── <rule>/             # V-05, R-07, G-7, 7.3, … or _valid
+        └── <expect>-<slug>.json
+```
+
+`<expect>` is `pass` or `fail`. `<slug>` is lowercase ASCII letters,
+digits and hyphens. A vector that passes every rule of a document lives
+under `_valid/`.
+
+#### 5.6.2 Vector file
+
+Each vector is one JSON file (RFC 8259), UTF-8, with these fields:
+
+| Field | Required | Meaning |
+|---|---|---|
+| `adp_conformance` | yes | Format version of this section. `"1"`. |
+| `target` | yes | `{"doc": "ADP-1", "since": "1.0.0", "kind": "dispatch"}`. `kind` names the input shape the target document defines. |
+| `rules` | yes | Rule ids this vector exercises. A `fail` vector MUST list exactly one. A `pass` vector MAY list several. |
+| `expect` | yes | `"pass"` or `"fail"`. MUST match the directory name prefix. |
+| `description` | yes | One sentence: what is in the input and why it gets the expected verdict. |
+| `known_defect` | no | An `ADP-D-NNN` id. See §5.6.4. |
+| `input` | yes | The document under test, in the shape `target.kind` names. |
+
+#### 5.6.3 Rules for vectors
+
+1. A `fail` vector MUST violate exactly the one rule it lists, and
+   otherwise satisfy every rule of its target document. It SHOULD be a
+   `pass` vector with one change.
+2. A vector's `expect` MUST follow the normative spec text, not any
+   schema or implementation (ADP-0 §3.2 rule 1).
+3. No vector may be written for an input whose verdict depends on an
+   open internal contradiction in normative text (ADP-0 §3.2 rule 2).
+   Such inputs wait for the proposal that resolves the contradiction.
+4. Coverage: every rule in a target document's validation tables MUST
+   have at least one `pass` and one `fail` vector. A `pass` vector covers
+   every rule in its `rules` list.
+5. Vectors are changed only through an accepted proposal (ADP-0 §5.4
+   step 2), like any other normative artifact.
+
+#### 5.6.4 Known defects
+
+When a published schema or implementation disagrees with a vector, and
+the disagreement is an OPEN entry in `DEFECTS.md`, the vector carries
+`known_defect` with that id. Checks then expect the disagreement:
+
+- the defect is OPEN and the artifact disagrees: the check passes;
+- the defect is OPEN and the artifact agrees: the check fails, because the
+  marker is stale and must be removed;
+- the defect is not OPEN and the vector still has the marker: the check
+  fails.
+
+A marker never changes `expect`. The vector states what the spec
+requires. The marker records that a known artifact does not do that yet.
+
 ---
 
 ## 6. Errata
@@ -350,3 +410,6 @@ adp-protocol/
 | 2026-11-15 | Pre-adoption revision: repository rules file is |
 |            | `AGENTS.md`, replacing `CONTRIBUTING.md` (§3,   |
 |            | §9, §10).                                       |
+| 2026-11-15 | 1.1.0. §5.6 Conformance suite format: layout,   |
+|            | vector file, rules for vectors, known-defect    |
+|            | markers. ADP-A-003.                             |

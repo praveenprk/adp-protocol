@@ -1,0 +1,37 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.0.0",
+    "kind": "dispatch"
+  },
+  "rules": [
+    "V-04"
+  ],
+  "expect": "fail",
+  "description": "Dispatch whose context.read is an empty array.",
+  "input": {
+    "adp_version": "1.0.0",
+    "dispatch": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ]
+    },
+    "context": {
+      "read": []
+    },
+    "work_items": [
+      {
+        "keyword": "PRODUCE",
+        "description": "write module"
+      }
+    ],
+    "exit": [
+      "tests pass"
+    ],
+    "report": [
+      "commit_hash"
+    ]
+  }
+}

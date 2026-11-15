@@ -1,0 +1,35 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.0.0",
+    "kind": "report"
+  },
+  "rules": [
+    "R-04"
+  ],
+  "expect": "fail",
+  "description": "Report whose status DONE is not one of the defined statuses.",
+  "input": {
+    "adp_version": "1.0.0",
+    "report": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ],
+      "status": "DONE"
+    },
+    "exit_results": [
+      {
+        "condition": "tests pass",
+        "result": true
+      }
+    ],
+    "items": [
+      {
+        "key": "commit_hash",
+        "value": "abc"
+      }
+    ]
+  }
+}

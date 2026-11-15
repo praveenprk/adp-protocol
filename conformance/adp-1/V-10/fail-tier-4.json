@@ -1,0 +1,42 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.0.0",
+    "kind": "dispatch"
+  },
+  "rules": [
+    "V-10"
+  ],
+  "expect": "fail",
+  "description": "Dispatch whose dispatch.tier is 4, outside 1 to 3.",
+  "input": {
+    "adp_version": "1.0.0",
+    "dispatch": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ],
+      "tier": 4
+    },
+    "context": {
+      "read": [
+        {
+          "path": "docs/spec.md"
+        }
+      ]
+    },
+    "work_items": [
+      {
+        "keyword": "PRODUCE",
+        "description": "write module"
+      }
+    ],
+    "exit": [
+      "tests pass"
+    ],
+    "report": [
+      "commit_hash"
+    ]
+  }
+}
