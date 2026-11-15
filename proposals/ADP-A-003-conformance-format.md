@@ -250,13 +250,17 @@ CI check fails until they are.
 
 ## Questions for the maintainer
 
-| # | Question | Draft default |
-|---|----------|---------------|
-| Q1 | Should the format live in ADP-0 as a new §5.6 (as drafted), or in a new document? | ADP-0 §5.6 (A1). |
-| Q2 | JSON vectors, as drafted? | Yes (A3). |
-| Q3 | Should known-defect markers fail CI when stale (§5.6.4)? | Yes. Otherwise a fixed defect could leave a misleading marker behind. |
-| Q4 | Should the ADP-1 vectors be part of this proposal (C2), or a separate one? | Part of this one (A6). They are the format's proof and change no verdict. |
-| Q5 | The ADP-A-001 Decision line still names ADP-A-002 as the creator of `conformance/`. Add a note to it? | Your call. Only the maintainer may amend a Decision (ADP-0 §5.3). |
+Answers were given in a working session and are quoted as English
+translations. They are recorded here so the proposal reads complete. They are
+not the Decision (ADP-0 §5.3).
+
+| # | Question | Draft default | Maintainer answer | Effect on this draft |
+|---|----------|---------------|-------------------|----------------------|
+| Q1 | Should the format live in ADP-0 as a new §5.6 (as drafted), or in a new document? | ADP-0 §5.6 (A1). | (translated) "Go with your recommendation." | Settled as drafted. |
+| Q2 | JSON vectors, as drafted? | Yes (A3). | (translated) "Go with your recommendation." | Settled as drafted. |
+| Q3 | Should known-defect markers fail CI when stale (§5.6.4)? | Yes. Otherwise a fixed defect could leave a misleading marker behind. | (translated) "Go with your recommendation." | Settled as drafted. |
+| Q4 | Should the ADP-1 vectors be part of this proposal (C2), or a separate one? | Part of this one (A6). They are the format's proof and change no verdict. | (translated) "Go with your recommendation." | Settled as drafted. |
+| Q5 | The ADP-A-001 Decision line still names ADP-A-002 as the creator of `conformance/`. Add a note to it? | Your call. Only the maintainer may amend a Decision (ADP-0 §5.3). | Resolved by the maintainer in PR #10 (commit 618e934). | Settled. No change to this draft. |
 
 ---
 
