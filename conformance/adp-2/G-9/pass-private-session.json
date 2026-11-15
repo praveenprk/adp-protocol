@@ -1,0 +1,28 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-2",
+    "since": "1.0.0",
+    "kind": "codebase-record"
+  },
+  "rules": [
+    "G-9"
+  ],
+  "expect": "pass",
+  "description": "Human-signed record for CREATE-PRIVATE (R2) with span session, which R2 allows.",
+  "input": {
+    "record": {
+      "classes": [
+        "CREATE-PRIVATE"
+      ],
+      "boundary": {
+        "namespaces": [
+          "acme"
+        ]
+      },
+      "span": "session",
+      "signed_by": "maintainer",
+      "signature": "sig-9"
+    }
+  }
+}

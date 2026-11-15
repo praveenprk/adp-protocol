@@ -1,0 +1,28 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-2",
+    "since": "1.0.0",
+    "kind": "codebase-record"
+  },
+  "rules": [
+    "G-9"
+  ],
+  "expect": "fail",
+  "description": "Record for CREATE-PUBLIC (R3) with span session; R3 allows event only.",
+  "input": {
+    "record": {
+      "classes": [
+        "CREATE-PUBLIC"
+      ],
+      "boundary": {
+        "namespaces": [
+          "acme"
+        ]
+      },
+      "span": "session",
+      "signed_by": "maintainer",
+      "signature": "sig-9"
+    }
+  }
+}

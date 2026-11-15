@@ -1,0 +1,27 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-2",
+    "since": "1.0.0",
+    "kind": "codebase-record"
+  },
+  "rules": [
+    "G-9"
+  ],
+  "expect": "fail",
+  "description": "Record without span, which G-9 requires and gives no default.",
+  "input": {
+    "record": {
+      "classes": [
+        "CREATE-PRIVATE"
+      ],
+      "boundary": {
+        "namespaces": [
+          "acme"
+        ]
+      },
+      "signed_by": "maintainer",
+      "signature": "sig-9"
+    }
+  }
+}

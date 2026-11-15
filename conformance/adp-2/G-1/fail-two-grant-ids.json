@@ -1,0 +1,137 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-2",
+    "since": "1.0.0",
+    "kind": "authority"
+  },
+  "rules": [
+    "G-1"
+  ],
+  "expect": "fail",
+  "description": "Dispatch whose anchor lists two grant ids, grant-1 and grant-2.",
+  "input": {
+    "dispatch": {
+      "adp_version": "1.1.0",
+      "dispatch": {
+        "agent": "impl-agent",
+        "anchor": [
+          "SPEC-001",
+          "grant-1",
+          "grant-2"
+        ]
+      },
+      "context": {
+        "read": [
+          {
+            "path": "docs/spec.md"
+          }
+        ]
+      },
+      "produce": [
+        {
+          "path": "src/a.py",
+          "action": "modify"
+        }
+      ],
+      "work_items": [
+        {
+          "keyword": "PRODUCE",
+          "description": "write module"
+        }
+      ],
+      "exit": [
+        "tests pass"
+      ],
+      "report": [
+        "commit_hash"
+      ]
+    },
+    "grant_chain": [
+      {
+        "adp_grant_version": "1.0.0",
+        "grant": {
+          "id": "grant-1",
+          "session": "s-1",
+          "issuer": "orchestrator",
+          "expires_at": "2026-11-16T23:00:00Z",
+          "types": [
+            "AT-READ",
+            "AT-VERIFY",
+            "AT-WRITE"
+          ],
+          "scope": {
+            "codebases": [
+              "https://example.org/acme/app"
+            ],
+            "read": [
+              "docs/**"
+            ],
+            "write": [
+              "src/**"
+            ],
+            "branches": [
+              "feat/*"
+            ],
+            "tools": []
+          },
+          "protected": [
+            "scripts/hooks/**",
+            "grants/**"
+          ],
+          "root": {
+            "kind": "approval",
+            "ref": [
+              "RFC-001",
+              "SPEC-001"
+            ],
+            "signed_by": "maintainer",
+            "signature": "sig-1"
+          }
+        }
+      },
+      {
+        "adp_grant_version": "1.0.0",
+        "grant": {
+          "id": "grant-2",
+          "session": "s-1",
+          "issuer": "orchestrator",
+          "expires_at": "2026-11-16T23:00:00Z",
+          "types": [
+            "AT-READ",
+            "AT-VERIFY",
+            "AT-WRITE"
+          ],
+          "scope": {
+            "codebases": [
+              "https://example.org/acme/app"
+            ],
+            "read": [
+              "docs/**"
+            ],
+            "write": [
+              "src/**"
+            ],
+            "branches": [
+              "feat/*"
+            ],
+            "tools": []
+          },
+          "protected": [
+            "scripts/hooks/**",
+            "grants/**"
+          ],
+          "root": {
+            "kind": "approval",
+            "ref": [
+              "RFC-001",
+              "SPEC-001"
+            ],
+            "signed_by": "maintainer",
+            "signature": "sig-1"
+          }
+        }
+      }
+    ]
+  }
+}

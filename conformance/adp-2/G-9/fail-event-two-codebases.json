@@ -1,0 +1,29 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-2",
+    "since": "1.0.0",
+    "kind": "codebase-record"
+  },
+  "rules": [
+    "G-9"
+  ],
+  "expect": "fail",
+  "description": "Record with span event that names two codebases; an event record names exactly one.",
+  "input": {
+    "record": {
+      "classes": [
+        "ARCHIVE"
+      ],
+      "boundary": {
+        "codebases": [
+          "https://example.org/acme/a",
+          "https://example.org/acme/b"
+        ]
+      },
+      "span": "event",
+      "signed_by": "maintainer",
+      "signature": "sig-9"
+    }
+  }
+}
