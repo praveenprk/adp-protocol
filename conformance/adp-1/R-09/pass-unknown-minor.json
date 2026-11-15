@@ -1,0 +1,35 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.0.0",
+    "kind": "report"
+  },
+  "rules": [
+    "R-09"
+  ],
+  "expect": "pass",
+  "description": "Report whose adp_version \"1.7.0\" has major version 1 and an unknown minor version, which §7.3 says parsers MUST accept.",
+  "input": {
+    "adp_version": "1.7.0",
+    "report": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ],
+      "status": "COMPLETE"
+    },
+    "exit_results": [
+      {
+        "condition": "tests pass",
+        "result": true
+      }
+    ],
+    "items": [
+      {
+        "key": "commit_hash",
+        "value": "abc"
+      }
+    ]
+  }
+}
