@@ -10,7 +10,6 @@
   ],
   "expect": "fail",
   "description": "Dispatch whose adp_version \"01.0.0\" has a leading zero, which semver forbids.",
-  "known_defect": "ADP-D-009",
   "input": {
     "adp_version": "01.0.0",
     "dispatch": {

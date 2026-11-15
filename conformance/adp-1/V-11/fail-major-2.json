@@ -6,11 +6,10 @@
     "kind": "dispatch"
   },
   "rules": [
-    "7.3"
+    "V-11"
   ],
   "expect": "fail",
-  "description": "Dispatch whose adp_version \"2.0.0\" has an unknown major version, which §7.3 says parsers MUST reject.",
-  "known_defect": "ADP-D-004",
+  "description": "Dispatch whose adp_version \"2.0.0\" is valid SemVer with major version 2, which V-11 rejects (§7.3).",
   "input": {
     "adp_version": "2.0.0",
     "dispatch": {

@@ -9,8 +9,9 @@
   "properties": {
     "adp_version": {
       "type": "string",
-      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
-      "description": "Semver protocol version"
+      "pattern": "^1\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(?![\\s\\S])",
+      "description": "ADP-1 protocol version: SemVer 2.0.0 with major version 1 (ADP-1 §9; V-01, V-11, R-01, R-09)",
+      "$comment": "Ends with (?![\\s\\S]), not $: in Python re, $ also matches before a final newline. [0-9], not \\d: in Python re, \\d matches non-ASCII digits."
     },
     "dispatch": {
       "type": "object",

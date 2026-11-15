@@ -4,7 +4,7 @@
 |--------------|-----------------------------------------|
 | **ID**       | ADP-1                                   |
 | **Title**    | Agent Dispatch Protocol                 |
-| **Version**  | 1.0.1                                   |
+| **Version**  | 1.0.2                                   |
 | **Status**   | Draft                                   |
 | **License**  | Apache 2.0                              |
 | **Date**     | 2026-11-15                              |
@@ -322,7 +322,7 @@ A validator MUST reject a dispatch envelope that fails any rule in
 
 | Rule | Check                                              |
 |------|----------------------------------------------------|
-| V-01 | `adp_version` present and parseable as semver      |
+| V-01 | `adp_version` present and valid SemVer 2.0.0       |
 | V-02 | `dispatch.agent` non-empty string                  |
 | V-03 | `dispatch.anchor` non-empty array                  |
 | V-04 | `context.read` non-empty array                     |
@@ -332,12 +332,13 @@ A validator MUST reject a dispatch envelope that fails any rule in
 | V-08 | Every `work_items[].keyword` in defined vocabulary  |
 | V-09 | No unknown top-level fields outside schema         |
 | V-10 | `dispatch.tier` if present is 1, 2, or 3           |
+| V-11 | `adp_version` major version is 1 (§7.3)            |
 
 ### 7.2 Report Validation Rules
 
 | Rule | Check                                              |
 |------|----------------------------------------------------|
-| R-01 | `adp_version` present and parseable as semver      |
+| R-01 | `adp_version` present and valid SemVer 2.0.0       |
 | R-02 | `report.agent` non-empty string                    |
 | R-03 | `report.anchor` non-empty array                    |
 | R-04 | `report.status` is COMPLETE, BLOCKED, or SURFACE   |
@@ -345,6 +346,7 @@ A validator MUST reject a dispatch envelope that fails any rule in
 | R-06 | `items` non-empty array                            |
 | R-07 | If status BLOCKED: items contains key `blocker`    |
 | R-08 | If status SURFACE: items contains key `finding`    |
+| R-09 | `adp_version` major version is 1 (§7.3)            |
 
 ### 7.3 Version Compatibility
 
@@ -352,6 +354,8 @@ Parsers MUST reject unknown major versions.
 Parsers MUST accept unknown minor versions (ignore unknown
 optional fields).
 Unknown `x-` namespaced metadata fields are always ignored.
+
+For ADP-1 the only known major version is 1 (V-11, R-09).
 
 ---
 
@@ -376,7 +380,10 @@ deduplication.
 
 ## 9. Versioning
 
-Semver. `adp_version` field in every envelope.
+Semantic Versioning 2.0.0 (https://semver.org/spec/v2.0.0.html).
+`adp_version` field in every envelope. A pre-release or build
+metadata suffix is allowed (`1.1.0-rc.1`, `1.0.2+build.5`).
+Compatibility (§7.3) depends on the major version only.
 
 | Change                            | Bump  |
 |-----------------------------------|-------|
@@ -433,3 +440,7 @@ If 2.0.0 is ever needed, the original design was wrong.
 | 2026-11-15 | 1.0.1. Key words per BCP 14 (Conventions);      |
 |            | §7.1/§7.2 rules bind validators (§7). ADP-A-001, |
 |            | resolves ADP-D-012.                             |
+| 2026-11-15 | 1.0.2. `adp_version` is SemVer 2.0.0 (§9,      |
+|            | V-01, R-01); major version 1 checked by new    |
+|            | V-11 and R-09 (§7.3). ADP-A-004, resolves      |
+|            | ADP-D-004 and ADP-D-009.                       |
