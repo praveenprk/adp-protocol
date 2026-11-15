@@ -252,8 +252,9 @@ CI check fails until they are.
 
 For Q1 to Q4, the recommendation below was sent to the maintainer in a
 working session and matches the drafted default. The maintainer's answers were
-given in that session and are quoted as English translations. They are recorded
-here so the proposal reads complete. They are not the Decision (ADP-0 §5.3).
+given in that session and are quoted as English translations. These answers
+shape the draft. They do not accept it. Only the Decision section below accepts
+or rejects the proposal (ADP-0 §5.3).
 
 | # | Question | Recommendation (setting and reason) | Maintainer answer | Effect on this draft |
 |---|----------|-------------------------------------|-------------------|----------------------|
