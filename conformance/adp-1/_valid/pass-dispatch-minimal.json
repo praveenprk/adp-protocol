@@ -16,7 +16,8 @@
     "V-08",
     "V-09",
     "V-10",
-    "V-11"
+    "V-11",
+    "V-12"
   ],
   "expect": "pass",
   "description": "Dispatch with only the required fields, each non-empty and valid, so it passes every rule in §7.1.",

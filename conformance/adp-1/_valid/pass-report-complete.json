@@ -12,7 +12,9 @@
     "R-04",
     "R-05",
     "R-06",
-    "R-09"
+    "R-09",
+    "R-10",
+    "R-11"
   ],
   "expect": "pass",
   "description": "COMPLETE report with one passing exit result and one item, so it passes R-01 to R-06.",

@@ -1,0 +1,42 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.1.0",
+    "kind": "dispatch"
+  },
+  "rules": [
+    "V-09"
+  ],
+  "expect": "fail",
+  "description": "Dispatch at 1.0.0 with an unknown field extra in a read entry; V-09 applies at every level for a known minor version.",
+  "input": {
+    "adp_version": "1.0.0",
+    "dispatch": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ]
+    },
+    "context": {
+      "read": [
+        {
+          "path": "docs/spec.md",
+          "extra": 1
+        }
+      ]
+    },
+    "work_items": [
+      {
+        "keyword": "PRODUCE",
+        "description": "write module"
+      }
+    ],
+    "exit": [
+      "tests pass"
+    ],
+    "report": [
+      "commit_hash"
+    ]
+  }
+}

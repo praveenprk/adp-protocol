@@ -1,0 +1,44 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.1.0",
+    "kind": "dispatch"
+  },
+  "rules": [
+    "V-12"
+  ],
+  "expect": "fail",
+  "description": "Dispatch at 1.2.0 whose metadata key x-Acme-thing does not have the §3.5 form; §7.3 applies §3.5 in every version.",
+  "input": {
+    "adp_version": "1.2.0",
+    "dispatch": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ]
+    },
+    "context": {
+      "read": [
+        {
+          "path": "docs/spec.md"
+        }
+      ]
+    },
+    "work_items": [
+      {
+        "keyword": "PRODUCE",
+        "description": "write module"
+      }
+    ],
+    "exit": [
+      "tests pass"
+    ],
+    "report": [
+      "commit_hash"
+    ],
+    "metadata": {
+      "x-Acme-thing": 1
+    }
+  }
+}
