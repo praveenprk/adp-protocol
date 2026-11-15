@@ -214,6 +214,8 @@ Notes       : Departs from the CRITICAL row: §5.3 states the
               semantics declaratively, without an RFC 2119 keyword,
               and the binding strength of the validation tables is
               itself undefined (ADP-D-012).
+              ADP-1 1.0.1 (ADP-A-001 C2, 7a55eb5): the §7 tables now
+              bind validators. Grade stays as filed (ADP-0 §4.5).
 
 ### ADP-D-009
 Artifact    : Normative — spec/ADP-1.md §7.1 V-01, §7.2 R-01;
@@ -235,6 +237,8 @@ Notes       : Conformant rejected and non-conformant accepted.
               see ADP-D-012. Whether pre-release versions are
               meaningful for ADP is a separate question for the
               resolving proposal.
+              ADP-1 1.0.1 (ADP-A-001 C2, 7a55eb5): the §7 tables now
+              bind validators. Grade stays as filed (ADP-0 §4.5).
 
 ### ADP-D-010
 Artifact    : Normative — spec/ADP-1.md §6 "Tier Selection Guidance"
@@ -284,8 +288,8 @@ Does        : ADP-1 never declares that these key words are to be
 Evidence    : At 49bf19f6297e3bbf3d694dc49e7758080e255ee9:
               `grep -n "RFC 2119" spec/ADP-1.md` → lines 384, 387 only (§10 table)
 Severity    : HIGH
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-001, 7a55eb5
 Notes       : No table row fits. Graded HIGH because the grade of
               every other normative entry depends on it (ADP-D-008,
               ADP-D-009).
