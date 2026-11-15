@@ -76,6 +76,7 @@ assert result.valid
 ```
 adp-protocol/
 ├── spec/ADP-1.md              # Protocol specification
+├── spec/ADP-2.md              # Dispatch authority (grants, Draft)
 ├── schema/
 │   ├── dispatch.schema.json   # Dispatch envelope schema
 │   └── report.schema.json     # Report envelope schema
