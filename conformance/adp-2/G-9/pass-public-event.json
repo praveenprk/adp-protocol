@@ -1,0 +1,28 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-2",
+    "since": "1.0.0",
+    "kind": "codebase-record"
+  },
+  "rules": [
+    "G-9"
+  ],
+  "expect": "pass",
+  "description": "Human-signed record for CREATE-PUBLIC (R3) with span event, naming exactly one codebase.",
+  "input": {
+    "record": {
+      "classes": [
+        "CREATE-PUBLIC"
+      ],
+      "boundary": {
+        "codebases": [
+          "https://example.org/acme/site"
+        ]
+      },
+      "span": "event",
+      "signed_by": "maintainer",
+      "signature": "sig-9"
+    }
+  }
+}

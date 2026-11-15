@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adp-protocol.dev/schema/grant.schema.json",
+  "title": "ADP Grant Document",
+  "description": "Per-session grant of automation types per ADP-2 §4",
+  "$comment": "Checks the document shape in ADP-2 §4 and G-2 only. G-1 and G-3 to G-7 relate a dispatch to its grant chain and are checked by an ADP-2 validator (ADP-2 §6), not by this schema.",
+  "type": "object",
+  "required": ["adp_grant_version", "grant"],
+  "properties": {
+    "adp_grant_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Grant document version"
+    },
+    "grant": {
+      "type": "object",
+      "required": ["id", "session", "issuer", "expires_at", "types", "scope", "protected"],
+      "anyOf": [
+        { "required": ["root"] },
+        { "required": ["parent"] }
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique, never reused"
+        },
+        "session": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The session this grant is bound to"
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Orchestrator identity"
+        },
+        "root": { "$ref": "#/$defs/Root" },
+        "parent": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Id of the delegating grant"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "RFC 3339 UTC"
+        },
+        "types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["AT-READ", "AT-VERIFY", "AT-WRITE", "AT-VCS", "AT-TOOL"]
+          },
+          "description": "Grantable types only (ADP-2 §2, G-2)"
+        },
+        "scope": {
+          "type": "object",
+          "properties": {
+            "codebases": { "$ref": "#/$defs/Strings" },
+            "read": { "$ref": "#/$defs/Strings" },
+            "write": { "$ref": "#/$defs/Strings" },
+            "branches": { "$ref": "#/$defs/Strings" },
+            "tools": { "$ref": "#/$defs/Strings" }
+          }
+        },
+        "protected": {
+          "$ref": "#/$defs/Strings",
+          "description": "Globs the grant never covers for writing (G-7)"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Root": {
+      "type": "object",
+      "required": ["kind", "ref", "signed_by", "signature"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["approval", "ruling"]
+        },
+        "ref": { "$ref": "#/$defs/Strings" },
+        "signed_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Strings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
