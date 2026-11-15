@@ -343,3 +343,5 @@ section below accepts or rejects the proposal (ADP-0 §5.3).
 
 ## Decision
 
+ACCEPTED 2026-11-15 by the maintainer (ADP-0 §5.3). Apply as written,
+with the answers recorded under the questions for the maintainer.
