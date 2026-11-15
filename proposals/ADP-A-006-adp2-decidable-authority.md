@@ -326,17 +326,20 @@ were undecidable before and pass now.
 
 ## Questions for the maintainer
 
+For Q1 to Q6, the recommendation below was sent to the maintainer in a
+working session and matches the drafted default. The maintainer's answers
+were given in that session and are quoted as English translations.
 These answers shape the draft. They do not accept it. Only the Decision
 section below accepts or rejects the proposal (ADP-0 §5.3).
 
 | # | Question | Recommendation (setting and reason) | Maintainer answer | Effect on this draft |
 |---|----------|-------------------------------------|-------------------|----------------------|
-| Q1 | How is the codebase event record checked (ADP-D-018)? | **As its own document (§4.3), by a separate pure function `validate_record(record)`. The runtime matches events to records.** A record is valid or not on its own, and a validator cannot see from a dispatch that an event happens (A1 rejected). | — | — |
-| Q2 | Which glob dialect, and what is "overlap" (ADP-D-019)? | **ADP-2's own minimal dialect (`*` within a segment, `**` for whole segments). Paths with `.`, `..` or a leading `/` match nothing. Overlap uses the conservative literal-prefix test.** It is exact, small, safe against path traversal, and never misses an overlap (A2, A3 rejected). | — | — |
-| Q3 | How does a validator recognise a grant id in `dispatch.anchor` (ADP-D-020)? | **By membership: an entry is a grant id if it equals the id of a grant in the chain given.** No naming convention is needed (A4 rejected). | — | — |
-| Q4 | What about `AT-VERIFY` and codebase events, which a pure validator cannot infer (ADP-D-021)? | **Never inferred from a dispatch. They are declared in the grant or the record, and enforced by the runtime, like `AT-VCS` and `AT-TOOL` today.** This makes G-3 decidable (A5 rejected). | — | — |
-| Q5 | Grant document rules (ADP-D-022)? | **Every field required except `root`/`parent` (one of them) and the `scope` keys. `expires_at` in UTC. Unknown fields ignored. New rule G-10.** Every authority-limiting field is required, so typos fail closed (A6 rejected). | — | — |
-| Q6 | Bump class? | **Major, ADP-2 → 2.0.0, with SemVer for `adp_grant_version`.** ADP-0 §7 has no Draft exemption, and the cost now is only a number. The alternative is Minor (1.1.0) without the version grammar (A7), which leaves D-022 partly open. | — | — |
+| Q1 | How is the codebase event record checked (ADP-D-018)? | **As its own document (§4.3), by a separate pure function `validate_record(record)`. The runtime matches events to records.** A record is valid or not on its own, and a validator cannot see from a dispatch that an event happens (A1 rejected). | Accepted the recommendation. Translated: "Q6 as per rec as sensible choice. Checked PR 19. Go as rec as sensible defaults." | Settled as drafted. |
+| Q2 | Which glob dialect, and what is "overlap" (ADP-D-019)? | **ADP-2's own minimal dialect (`*` within a segment, `**` for whole segments). Paths with `.`, `..` or a leading `/` match nothing. Overlap uses the conservative literal-prefix test.** It is exact, small, safe against path traversal, and never misses an overlap (A2, A3 rejected). | Accepted the recommendation. Translated: "Q6 as per rec as sensible choice. Checked PR 19. Go as rec as sensible defaults." | Settled as drafted. |
+| Q3 | How does a validator recognise a grant id in `dispatch.anchor` (ADP-D-020)? | **By membership: an entry is a grant id if it equals the id of a grant in the chain given.** No naming convention is needed (A4 rejected). | Accepted the recommendation. Translated: "Q6 as per rec as sensible choice. Checked PR 19. Go as rec as sensible defaults." | Settled as drafted. |
+| Q4 | What about `AT-VERIFY` and codebase events, which a pure validator cannot infer (ADP-D-021)? | **Never inferred from a dispatch. They are declared in the grant or the record, and enforced by the runtime, like `AT-VCS` and `AT-TOOL` today.** This makes G-3 decidable (A5 rejected). | Accepted the recommendation. Translated: "Q6 as per rec as sensible choice. Checked PR 19. Go as rec as sensible defaults." | Settled as drafted. |
+| Q5 | Grant document rules (ADP-D-022)? | **Every field required except `root`/`parent` (one of them) and the `scope` keys. `expires_at` in UTC. Unknown fields ignored. New rule G-10.** Every authority-limiting field is required, so typos fail closed (A6 rejected). | Accepted the recommendation. Translated: "Q6 as per rec as sensible choice. Checked PR 19. Go as rec as sensible defaults." | Settled as drafted. |
+| Q6 | Bump class? | **Major, ADP-2 → 2.0.0, with SemVer for `adp_grant_version`.** ADP-0 §7 has no Draft exemption, and the cost now is only a number. The alternative is Minor (1.1.0) without the version grammar (A7), which leaves D-022 partly open. | Accepted the recommendation. Translated: "Q6 as per rec as sensible choice. Checked PR 19. Go as rec as sensible defaults." | Settled as drafted. |
 
 ---
 
