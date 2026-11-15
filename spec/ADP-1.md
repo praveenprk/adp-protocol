@@ -4,10 +4,10 @@
 |--------------|-----------------------------------------|
 | **ID**       | ADP-1                                   |
 | **Title**    | Agent Dispatch Protocol                 |
-| **Version**  | 1.0.2                                   |
+| **Version**  | 1.1.0                                   |
 | **Status**   | Draft                                   |
 | **License**  | Apache 2.0                              |
-| **Date**     | 2026-11-15                              |
+| **Date**     | 2026-11-16                              |
 
 ---
 
@@ -118,8 +118,12 @@ structural directive with defined semantics.
 The keyword set is frozen at v1.0.0. No new keywords in any
 1.x.y release.
 
-Extensions are carried as namespaced metadata on work items,
-envelope, or report. Namespace format: `x-{namespace}-{name}`.
+Extensions are carried in a `metadata` object on a work item
+(§4.3), on the dispatch envelope (§4.2), or on the report envelope
+(§5.1). Each key in a `metadata` object has the form
+`x-{namespace}-{name}`. `{namespace}` is one or more lowercase
+ASCII letters. `{name}` is one or more lowercase ASCII letters,
+digits, or hyphens. Values are not constrained.
 
 ```yaml
 work_items:
@@ -130,7 +134,8 @@ work_items:
       x-contextos-source: "SPEC-027 §5"
 ```
 
-Validators MUST ignore unknown `x-` metadata fields.
+Validators MUST ignore every `metadata` entry whose key has this
+form, and MUST reject a `metadata` key that does not (V-12, R-11).
 Validators MUST reject unknown keywords.
 
 ---
@@ -173,6 +178,8 @@ context:
 produce: [ProduceEntry]  # output artifacts
 
 work_items: [WorkItem]   # directive-bearing work items
+
+metadata: object         # namespaced extensions (§3.5)
 ```
 
 ### 4.3 Field Definitions
@@ -222,6 +229,12 @@ report:
 exit_results: [ExitResult]
 
 items: [ReportItem]
+```
+
+Optional:
+
+```yaml
+metadata: object         # namespaced extensions (§3.5)
 ```
 
 ### 5.2 Field Definitions
@@ -330,9 +343,10 @@ A validator MUST reject a dispatch envelope that fails any rule in
 | V-06 | `report` non-empty array                           |
 | V-07 | At least one of `produce` or `work_items` present  |
 | V-08 | Every `work_items[].keyword` in defined vocabulary  |
-| V-09 | No unknown top-level fields outside schema         |
+| V-09 | No unknown field in any §4 object (§7.3)           |
 | V-10 | `dispatch.tier` if present is 1, 2, or 3           |
 | V-11 | `adp_version` major version is 1 (§7.3)            |
+| V-12 | Every `metadata` key has the §3.5 form             |
 
 ### 7.2 Report Validation Rules
 
@@ -347,13 +361,17 @@ A validator MUST reject a dispatch envelope that fails any rule in
 | R-07 | If status BLOCKED: items contains key `blocker`    |
 | R-08 | If status SURFACE: items contains key `finding`    |
 | R-09 | `adp_version` major version is 1 (§7.3)            |
+| R-10 | No unknown field in any §5 object (§7.3)           |
+| R-11 | Every `metadata` key has the §3.5 form             |
 
 ### 7.3 Version Compatibility
 
 Parsers MUST reject unknown major versions.
-Parsers MUST accept unknown minor versions (ignore unknown
-optional fields).
-Unknown `x-` namespaced metadata fields are always ignored.
+Parsers MUST accept unknown minor versions. When the minor
+version in `adp_version` is higher than every minor version the
+validator implements, the validator MUST ignore fields it does not
+know, at every level, instead of applying V-09 and R-10.
+`metadata` entries follow §3.5 in every version.
 
 For ADP-1 the only known major version is 1 (V-11, R-09).
 
@@ -444,3 +462,9 @@ If 2.0.0 is ever needed, the original design was wrong.
 |            | V-01, R-01); major version 1 checked by new    |
 |            | V-11 and R-09 (§7.3). ADP-A-004, resolves      |
 |            | ADP-D-004 and ADP-D-009.                       |
+| 2026-11-16 | 1.1.0. Extensions in `metadata` on work item,  |
+|            | dispatch and report (§3.5, §4.2, §5.1); key    |
+|            | form defined; unknown fields ignored only for  |
+|            | a higher minor (§7.3); V-09 every level; new   |
+|            | V-12, R-10, R-11. ADP-A-005, resolves          |
+|            | ADP-D-003, ADP-D-006 and ADP-D-007.            |

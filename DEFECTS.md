@@ -116,8 +116,8 @@ Evidence    : At 49bf19f6297e3bbf3d694dc49e7758080e255ee9:
               `grep -nE '^\| V-09|accept unknown minor' spec/ADP-1.md` → lines 320, 339
               harness: `minor-unknown-field` → False
 Severity    : CRITICAL
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-005, 6e7be3b
 Notes       : Conformant envelope rejected. Also an internal
               contradiction between V-09 and §7.3. Shares root
               (`additionalProperties: false`) with ADP-D-006.
@@ -174,8 +174,8 @@ Evidence    : At 49bf19f6297e3bbf3d694dc49e7758080e255ee9:
               harness: `envelope-x-field` → False
               harness: `dispatch-metadata` → False
 Severity    : CRITICAL
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-005, 6e7be3b
 Notes       : Conformant envelope rejected. Also underspecified:
               the spec permits envelope/report extensions without
               defining a location. Shares root with ADP-D-003.
@@ -194,8 +194,8 @@ Evidence    : At 49bf19f6297e3bbf3d694dc49e7758080e255ee9:
               harness: `x-uppercase-ns` → False
               harness: `x-lowercase-ns` → True
 Severity    : HIGH
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-005, 6e7be3b
 Notes       : Departs from the CRITICAL row: whether `x-Acme-thing`
               is a conformant key is undefined, because the spec sets
               no character set. The defect is the spec gap plus a

@@ -1,0 +1,44 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.1.0",
+    "kind": "dispatch"
+  },
+  "rules": [
+    "V-12"
+  ],
+  "expect": "fail",
+  "description": "Dispatch whose work-item metadata key x-Acme-thing has an uppercase namespace, which the §3.5 form does not allow.",
+  "input": {
+    "adp_version": "1.1.0",
+    "dispatch": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ]
+    },
+    "context": {
+      "read": [
+        {
+          "path": "docs/spec.md"
+        }
+      ]
+    },
+    "work_items": [
+      {
+        "keyword": "PRODUCE",
+        "description": "write module",
+        "metadata": {
+          "x-Acme-thing": 1
+        }
+      }
+    ],
+    "exit": [
+      "tests pass"
+    ],
+    "report": [
+      "commit_hash"
+    ]
+  }
+}

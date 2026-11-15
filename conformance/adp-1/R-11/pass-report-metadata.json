@@ -1,0 +1,38 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.1.0",
+    "kind": "report"
+  },
+  "rules": [
+    "R-11"
+  ],
+  "expect": "pass",
+  "description": "Report with top-level metadata whose key x-acme-trace has the §3.5 form.",
+  "input": {
+    "adp_version": "1.1.0",
+    "report": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ],
+      "status": "COMPLETE"
+    },
+    "exit_results": [
+      {
+        "condition": "tests pass",
+        "result": true
+      }
+    ],
+    "items": [
+      {
+        "key": "commit_hash",
+        "value": "abc"
+      }
+    ],
+    "metadata": {
+      "x-acme-trace": "t1"
+    }
+  }
+}

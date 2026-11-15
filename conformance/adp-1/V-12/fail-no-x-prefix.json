@@ -1,0 +1,44 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.1.0",
+    "kind": "dispatch"
+  },
+  "rules": [
+    "V-12"
+  ],
+  "expect": "fail",
+  "description": "Dispatch whose top-level metadata key trace does not start with x-, so it does not have the §3.5 form.",
+  "input": {
+    "adp_version": "1.1.0",
+    "dispatch": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ]
+    },
+    "context": {
+      "read": [
+        {
+          "path": "docs/spec.md"
+        }
+      ]
+    },
+    "work_items": [
+      {
+        "keyword": "PRODUCE",
+        "description": "write module"
+      }
+    ],
+    "exit": [
+      "tests pass"
+    ],
+    "report": [
+      "commit_hash"
+    ],
+    "metadata": {
+      "trace": 1
+    }
+  }
+}

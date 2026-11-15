@@ -1,0 +1,44 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.1.0",
+    "kind": "dispatch"
+  },
+  "rules": [
+    "V-01"
+  ],
+  "expect": "pass",
+  "description": "Dispatch at 1.1.0, the version that defines top-level metadata, carrying a valid metadata entry.",
+  "input": {
+    "adp_version": "1.1.0",
+    "dispatch": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ]
+    },
+    "context": {
+      "read": [
+        {
+          "path": "docs/spec.md"
+        }
+      ]
+    },
+    "work_items": [
+      {
+        "keyword": "PRODUCE",
+        "description": "write module"
+      }
+    ],
+    "exit": [
+      "tests pass"
+    ],
+    "report": [
+      "commit_hash"
+    ],
+    "metadata": {
+      "x-acme-trace": "t1"
+    }
+  }
+}
