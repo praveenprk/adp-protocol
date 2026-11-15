@@ -133,11 +133,13 @@ Evidence    : At 49bf19f6297e3bbf3d694dc49e7758080e255ee9:
               `grep -n "reject unknown major" spec/ADP-1.md`
               harness: `major-2` → True
 Severity    : CRITICAL
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-004, 37e0f8b
 Notes       : Non-conformant envelope accepted.
               Vector `conformance/adp-1/7.3/fail-unknown-major.json`
               carries this marker (ADP-A-003, d15282b).
+              That vector moved to `conformance/adp-1/V-11/fail-major-2.json`
+              with the marker removed (ADP-A-004, 37e0f8b).
 
 ### ADP-D-005
 Artifact    : Legal — LICENSE (absent); README.md; spec/ADP-1.md header
@@ -232,8 +234,8 @@ Evidence    : At 49bf19f6297e3bbf3d694dc49e7758080e255ee9:
               harness: `semver-prerelease` → False
               harness: `semver-leading-zero` → True
 Severity    : CRITICAL
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-004, 37e0f8b
 Notes       : Conformant rejected and non-conformant accepted.
               The CRITICAL grade assumes the V-/R- tables are binding;
               see ADP-D-012. Whether pre-release versions are
@@ -243,6 +245,9 @@ Notes       : Conformant rejected and non-conformant accepted.
               bind validators. Grade stays as filed (ADP-0 §4.5).
               Vector `conformance/adp-1/V-01/fail-leading-zero.json`
               carries this marker (ADP-A-003, d15282b).
+              Same rule, found while drafting ADP-A-004: the pattern
+              accepted "1.0.0\n" in Python but not in ECMAScript.
+              Fixed by the same change (ADP-A-004 Q4).
 
 ### ADP-D-010
 Artifact    : Normative — spec/ADP-1.md §6 "Tier Selection Guidance"
