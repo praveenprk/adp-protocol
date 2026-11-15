@@ -284,6 +284,6 @@ Steps 1 and 2 SHOULD land in one commit (ADP-0 §5.4).
 
 ## Decision
 
-Pending. To be recorded by the maintainer (ADP-0 §5.3) as one line
-beginning `ACCEPTED`, `REJECTED` or `DEFERRED`, with the date and the
-reason.
+ACCEPTED 2026-11-15 by the maintainer (ADP-0 §5.3). Apply as written,
+with the answers recorded under the questions for the maintainer.
+`conformance/` is created by this proposal (ADP-A-002 Q5).
