@@ -199,4 +199,4 @@ together with the reasoning below.
 ACCEPTED 2026-11-15 by the maintainer (ADP-0 §5.3). Apply as written.
 §5.5 reading: C2 does not touch validation. It adds, removes and
 changes no rule, and no schema verdict changes, so `conformance/` is
-not created here. It is created by ADP-A-002.
+not created here. It is created by ADP-A-003 (ADP-A-002 Q5).

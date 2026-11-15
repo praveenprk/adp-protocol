@@ -410,6 +410,6 @@ identified by host and root path (§1). Reasons:
 
 ## Decision
 
-Pending. To be recorded by the maintainer (ADP-0 §5.3) as one line
-beginning `ACCEPTED`, `REJECTED` or `DEFERRED`, with the date and the
-reason.
+ACCEPTED 2026-11-15 by the maintainer (ADP-0 §5.3). Apply as written,
+with the answers recorded under the questions for the maintainer.
+`conformance/` is created by ADP-A-003, not by this proposal (Q5).
