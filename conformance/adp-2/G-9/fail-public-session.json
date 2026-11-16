@@ -2,8 +2,8 @@
   "adp_conformance": "1",
   "target": {
     "doc": "ADP-2",
-    "since": "1.0.0",
-    "kind": "codebase-record"
+    "since": "2.0.0",
+    "kind": "record"
   },
   "rules": [
     "G-9"
@@ -11,7 +11,9 @@
   "expect": "fail",
   "description": "Record for CREATE-PUBLIC (R3) with span session; R3 allows event only.",
   "input": {
+    "adp_record_version": "2.0.0",
     "record": {
+      "id": "record-4",
       "classes": [
         "CREATE-PUBLIC"
       ],

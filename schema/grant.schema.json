@@ -3,14 +3,15 @@
   "$id": "https://adp-protocol.dev/schema/grant.schema.json",
   "title": "ADP Grant Document",
   "description": "Per-session grant of automation types per ADP-2 §4",
-  "$comment": "Checks the document shape in ADP-2 §4 and G-2 only. G-1 and G-3 to G-7 relate a dispatch to its grant chain and are checked by an ADP-2 validator (ADP-2 §6), not by this schema.",
+  "$comment": "Checks the document shape in ADP-2 §4, G-2 and G-10. G-1 and G-3 to G-7 relate a dispatch to its grant chain and are checked by an ADP-2 validator (ADP-2 §6), not by this schema.",
   "type": "object",
   "required": ["adp_grant_version", "grant"],
   "properties": {
     "adp_grant_version": {
       "type": "string",
-      "minLength": 1,
-      "description": "Grant document version"
+      "pattern": "^2\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(?![\\s\\S])",
+      "description": "ADP-2 version the grant follows: SemVer 2.0.0 with major version 2 (ADP-2 §4, G-10)",
+      "$comment": "Ends with (?![\\s\\S]), not $: in Python re, $ also matches before a final newline. [0-9], not \\d: in Python re, \\d matches non-ASCII digits."
     },
     "grant": {
       "type": "object",
@@ -44,7 +45,8 @@
         "expires_at": {
           "type": "string",
           "format": "date-time",
-          "description": "RFC 3339 UTC"
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z(?![\\s\\S])",
+          "description": "RFC 3339 date-time in UTC, ending in Z (ADP-2 §4)"
         },
         "types": {
           "type": "array",

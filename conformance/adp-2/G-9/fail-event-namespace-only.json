@@ -1,0 +1,30 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-2",
+    "since": "2.0.0",
+    "kind": "record"
+  },
+  "rules": [
+    "G-9"
+  ],
+  "expect": "fail",
+  "description": "Record for ARCHIVE with span event whose boundary has only namespaces. An event record names exactly one codebase (G-9).",
+  "input": {
+    "adp_record_version": "2.0.0",
+    "record": {
+      "id": "record-8",
+      "classes": [
+        "ARCHIVE"
+      ],
+      "boundary": {
+        "namespaces": [
+          "acme"
+        ]
+      },
+      "span": "event",
+      "signed_by": "maintainer",
+      "signature": "sig-9"
+    }
+  }
+}
