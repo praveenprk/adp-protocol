@@ -28,6 +28,8 @@ RULE_ROW = re.compile(r"^\| ([A-Z]+-[0-9]{2}) +\|", re.M)
 SCHEMAS = {  # doc -> kind -> schema file
     "ADP-1": {"dispatch": "schema/dispatch.schema.json",
               "report": "schema/report.schema.json"},
+    "ADP-2": {"grant": "schema/grant.schema.json",
+              "record": "schema/record.schema.json"},
 }
 
 failed = False
