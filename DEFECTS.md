@@ -391,8 +391,8 @@ Evidence    : At 12e644b:
               `grep -n "validate(dispatch, grant_chain)\|record MUST state\|boundary\`: the" spec/ADP-2.md`
               → lines 160, 162, 182
 Severity    : HIGH
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-006, 1c435c8
 Notes       : Internal contradiction in normative text: the
               validator must check a document it is never given.
               Vectors under conformance/adp-2/G-9 use input
@@ -413,8 +413,8 @@ Evidence    : At 12e644b:
               `grep -n "globs\|MUST match \`scope\|MUST NOT overlap" spec/ADP-2.md`
               → lines 87, 90, 121, 122, 125, 144, 152
 Severity    : HIGH
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-006, 1c435c8
 Notes       : Departs from the CRITICAL row: whether a given path
               matches is undefined, so no envelope can be shown to
               be wrongly accepted or rejected. The defect is a MUST
@@ -433,8 +433,8 @@ Does        : `dispatch.anchor` also carries other references (ADP-1
 Evidence    : At 12e644b:
               `grep -n "grant id\|grant \`id\`" spec/ADP-2.md` → lines 130, 138
 Severity    : HIGH
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-006, 1c435c8
 Notes       : Departs from the CRITICAL row for the same reason as
               ADP-D-019: the count G-1 checks is undefined.
 
@@ -452,8 +452,8 @@ Does        : Whether a condition such as "tests pass" requires
 Evidence    : At 12e644b:
               `grep -n "requires running anything" spec/ADP-2.md` → lines 89, 93
 Severity    : HIGH
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-006, 1c435c8
 Notes       : Internal contradiction in normative text: G-3 must be
               checked by a pure function, and its input depends on
               facts outside the documents.
@@ -473,8 +473,8 @@ Evidence    : At 12e644b:
               `grep -n "adp_grant_version\|required unless parent" spec/ADP-2.md` → lines 106, 111
               `grep -n '"required"' schema/grant.schema.json`
 Severity    : HIGH
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-006, 1c435c8
 Notes       : Departs from the CRITICAL row: conformance of a grant
               with a missing field is undefined, so no verdict can be
               shown wrong. Same shape as ADP-D-007 (schema rule
