@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ADP Progress Ledger</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: an audit ledger. Status first, then the bank scenario, then the trend, then each merge as a ledger row. */
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --fg: #17202b; --muted: #5b6676; --line: #dde2ea;
+  --accent: #0f6e78; --accent-soft: #e2f1f2;
+  --crit: #b4232c; --high: #c26a12; --med: #a38a10; --low: #6b7686;
+  --ok: #1f7a4a; --ok-soft: #e3f3ea; --warn: #9a5b06; --warn-soft: #fbefdc; --no: #8a1f27; --no-soft: #f8e3e4;
+  --display: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f141a; --surface: #161d25; --fg: #e6ebf1; --muted: #9aa6b5; --line: #2a3440;
+  --accent: #4fb8c2; --accent-soft: #15333a;
+  --crit: #f06a72; --high: #f0a050; --med: #d9c14a; --low: #8e9aab;
+  --ok: #5cc98e; --ok-soft: #133024; --warn: #e9b062; --warn-soft: #33270f; --no: #f2858c; --no-soft: #3a1a1d;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f141a; --surface: #161d25; --fg: #e6ebf1; --muted: #9aa6b5; --line: #2a3440;
+  --accent: #4fb8c2; --accent-soft: #15333a;
+  --crit: #f06a72; --high: #f0a050; --med: #d9c14a; --low: #8e9aab;
+  --ok: #5cc98e; --ok-soft: #133024; --warn: #e9b062; --warn-soft: #33270f; --no: #f2858c; --no-soft: #3a1a1d;
+  color-scheme: dark; }
+
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 980px; margin: 0 auto; padding-block: 32px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: 2rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.3rem; margin-bottom: 4px; }
+h3 { font-size: 1rem; }
+p { margin: 0; max-width: 68ch; }
+.muted { color: var(--muted); }
+.eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+code, .id { font-family: var(--mono); font-size: 0.85em; }
+section { display: grid; gap: 14px; min-width: 0; }
+
+header { display: grid; gap: 10px; }
+.asof { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); }
+
+.status { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; }
+.tile .k { font-size: 0.8rem; color: var(--muted); }
+.tile .v { font-family: var(--display); font-size: 1.15rem; font-weight: 700; }
+.tile .d { font-size: 0.85rem; color: var(--muted); }
+
+.chip { display: inline-block; font-family: var(--mono); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.04em;
+  padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.chip.no { background: var(--no-soft); color: var(--no); }
+.chip.next { background: var(--accent-soft); color: var(--accent); }
+
+.qs { display: grid; gap: 10px; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px;
+  display: grid; grid-template-columns: 1fr auto; gap: 6px 16px; align-items: start; }
+.q h3 { font-family: var(--body); font-weight: 600; font-size: 0.98rem; }
+.q p { grid-column: 1 / -1; font-size: 0.9rem; color: var(--muted); }
+
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; overflow-x: auto; }
+.chart svg { display: block; width: 100%; min-width: 600px; height: auto; }
+.chart text { fill: var(--muted); font-family: var(--mono); font-size: 11px; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .tot { fill: var(--fg); font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.82rem; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; background: var(--sw); }
+
+.ledger { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.row { display: grid; grid-template-columns: 92px 1fr; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+.row .pr { font-family: var(--mono); font-size: 0.85rem; color: var(--accent); font-weight: 600; display: grid; gap: 4px; align-content: start; }
+.row .pr small { color: var(--muted); font-weight: 400; font-size: 0.75rem; }
+.row .body { display: grid; gap: 6px; min-width: 0; }
+.row .bank { font-size: 0.9rem; border-left: 2px solid var(--accent); padding-left: 10px; color: var(--fg); }
+.row .bank b { font-weight: 600; color: var(--accent); }
+
+.limits { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 8px; }
+.limits ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+footer { font-size: 0.82rem; color: var(--muted); display: grid; gap: 4px; }
+a { color: var(--accent); }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 560px) {
+  .row { grid-template-columns: 1fr; gap: 6px; }
+  .q { grid-template-columns: 1fr; }
+  h1 { font-size: 1.6rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">Agent Dispatch Protocol · progress</div>
+  <h1>ADP Progress Ledger</h1>
+  <p>What each merged change made possible, told through one regulated scenario: a bank using an AI coding agent on payment code.</p>
+  <div class="asof">As of main <span class="id">f6fd6ca</span> · 2026-11-17 · nothing in review</div>
+</header>
+
+<section aria-labelledby="now">
+  <h2 id="now">Where ADP stands</h2>
+  <div class="status">
+    <div class="tile"><span class="k">ADP-1 · instruction format</span><span class="v">1.1.0 · no critical defects</span><span class="d">Started with 4 critical defects. All fixed. 53 test vectors. All 6 open high defects are here.</span></div>
+    <div class="tile"><span class="k">ADP-2 · who may ask for what</span><span class="v">2.0.0 Draft · no open defects</span><span class="d">Every check now has one exact answer. 33 test vectors; CI verifies the grant and record answers.</span></div>
+    <div class="tile"><span class="k">Validator software</span><span class="v">Not built yet</span><span class="d">ADP is a specification plus an answer key. No product runs it today.</span></div>
+    <div class="tile"><span class="k">Known defects, open</span><span class="v">13 · 0 critical</span><span class="d">6 high, 1 medium, 6 low. Every one is written down with evidence.</span></div>
+  </div>
+</section>
+
+<section aria-labelledby="bank">
+  <div class="eyebrow">The scenario</div>
+  <h2 id="bank">A bank changes its fee calculation with an AI agent</h2>
+  <p class="muted">The payments team asks a coding agent to fix a rounding error in card fees, under change ticket CHG-4821. Before the change ships, an auditor asks four questions. This is how well ADP answers each one today.</p>
+  <div class="qs">
+    <div class="q"><h3>Who approved this work?</h3><span class="chip warn">Partly</span>
+      <p>A grant carries a human-signed approval as its root (ADP-2 G-6), and approval, merge and rulings can never be handed to an agent. A grant missing any limiting field is now rejected (G-10). The signature algorithm is deliberately left for later, so the signature must be present but is not yet checked cryptographically.</p></div>
+    <div class="q"><h3>How much freedom did the agent have?</h3><span class="chip warn">Partly</span>
+      <p>The grant names what the agent may read and write, for one session only (G-3, G-4, G-8). Path matching is now defined exactly, so every tool gives the same answer on whether <code>src/fees/round.py</code> is in scope. What is missing is software that enforces it.</p></div>
+    <div class="q"><h3>Could the agent change its own controls?</h3><span class="chip warn">Partly</span>
+      <p>No grant may let an agent write to its own guardrails: CI, hooks, grant storage (G-7). The overlap test is now defined and errs toward refusing, and a path like <code>src/../ci/hook</code> matches nothing. Enforcement on disk is the runtime's job, and no runtime exists yet.</p></div>
+    <div class="q"><h3>Can all of this be proven afterwards?</h3><span class="chip no">Not yet</span>
+      <p>The instruction, the grant and the human-signed repository record can each be checked by machine against published test cases, so the paperwork is solid. Proving what the agent actually did needs a runtime and a validator, and neither exists yet.</p></div>
+  </div>
+</section>
+
+<section aria-labelledby="trend">
+  <h2 id="trend">Open defects after each change</h2>
+  <p class="muted">Counted from <code>DEFECTS.md</code> at each merge commit on main. A rise at #18 is new gaps being written down, not new breakage.</p>
+  <div class="chart" role="img" aria-label="Stacked bars of open defects by severity at eight merges. Critical falls from 4 to 0 by PR 16. Total is 16 at baseline, 15 after PR 11, 13 after PR 14, 10 after PR 16 and 17, 18 after PR 18, and 13 after PR 20.">
+    <svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg">
+      <!-- scale: y = 210 - n*9 ; 0..20 -->
+      <line class="grid" x1="40" y1="210" x2="710" y2="210"/>
+      <line class="grid" x1="40" y1="165" x2="710" y2="165"/>
+      <line class="grid" x1="40" y1="120" x2="710" y2="120"/>
+      <line class="grid" x1="40" y1="75" x2="710" y2="75"/>
+      <line class="grid" x1="40" y1="30" x2="710" y2="30"/>
+      <text x="32" y="214" text-anchor="end">0</text>
+      <text x="32" y="169" text-anchor="end">5</text>
+      <text x="32" y="124" text-anchor="end">10</text>
+      <text x="32" y="79" text-anchor="end">15</text>
+      <text x="32" y="34" text-anchor="end">20</text>
+      <!-- bars: low, medium, high, critical from the bottom. width 44, step 84, start x=62 -->
+      <g id="b1"><!-- #3 baseline: C4 H6 M1 L5 = 16 -->
+        <rect x="62" y="165" width="44" height="45" fill="var(--low)"/>
+        <rect x="62" y="156" width="44" height="9" fill="var(--med)"/>
+        <rect x="62" y="102" width="44" height="54" fill="var(--high)"/>
+        <rect x="62" y="66" width="44" height="36" fill="var(--crit)"/>
+        <text class="tot" x="84" y="60" text-anchor="middle">16</text>
+        <text x="84" y="230" text-anchor="middle">#3</text><text x="84" y="244" text-anchor="middle">filed</text></g>
+      <g><!-- #11: C4 H5 M1 L5 = 15 -->
+        <rect x="146" y="165" width="44" height="45" fill="var(--low)"/>
+        <rect x="146" y="156" width="44" height="9" fill="var(--med)"/>
+        <rect x="146" y="111" width="44" height="45" fill="var(--high)"/>
+        <rect x="146" y="75" width="44" height="36" fill="var(--crit)"/>
+        <text class="tot" x="168" y="69" text-anchor="middle">15</text>
+        <text x="168" y="230" text-anchor="middle">#11</text><text x="168" y="244" text-anchor="middle">A-001</text></g>
+      <g><!-- #12: same counts -->
+        <rect x="230" y="165" width="44" height="45" fill="var(--low)"/>
+        <rect x="230" y="156" width="44" height="9" fill="var(--med)"/>
+        <rect x="230" y="111" width="44" height="45" fill="var(--high)"/>
+        <rect x="230" y="75" width="44" height="36" fill="var(--crit)"/>
+        <text class="tot" x="252" y="69" text-anchor="middle">15</text>
+        <text x="252" y="230" text-anchor="middle">#12</text><text x="252" y="244" text-anchor="middle">A-003</text></g>
+      <g><!-- #14: C2 H5 M1 L5 = 13 -->
+        <rect x="314" y="165" width="44" height="45" fill="var(--low)"/>
+        <rect x="314" y="156" width="44" height="9" fill="var(--med)"/>
+        <rect x="314" y="111" width="44" height="45" fill="var(--high)"/>
+        <rect x="314" y="93" width="44" height="18" fill="var(--crit)"/>
+        <text class="tot" x="336" y="87" text-anchor="middle">13</text>
+        <text x="336" y="230" text-anchor="middle">#14</text><text x="336" y="244" text-anchor="middle">A-004</text></g>
+      <g><!-- #16: C0 H4 M1 L5 = 10 -->
+        <rect x="398" y="165" width="44" height="45" fill="var(--low)"/>
+        <rect x="398" y="156" width="44" height="9" fill="var(--med)"/>
+        <rect x="398" y="120" width="44" height="36" fill="var(--high)"/>
+        <text class="tot" x="420" y="114" text-anchor="middle">10</text>
+        <text x="420" y="230" text-anchor="middle">#16</text><text x="420" y="244" text-anchor="middle">A-005</text></g>
+      <g><!-- #17: same -->
+        <rect x="482" y="165" width="44" height="45" fill="var(--low)"/>
+        <rect x="482" y="156" width="44" height="9" fill="var(--med)"/>
+        <rect x="482" y="120" width="44" height="36" fill="var(--high)"/>
+        <text class="tot" x="504" y="114" text-anchor="middle">10</text>
+        <text x="504" y="230" text-anchor="middle">#17</text><text x="504" y="244" text-anchor="middle">A-002</text></g>
+      <g><!-- #18: C0 H11 M1 L6 = 18 -->
+        <rect x="566" y="156" width="44" height="54" fill="var(--low)"/>
+        <rect x="566" y="147" width="44" height="9" fill="var(--med)"/>
+        <rect x="566" y="48" width="44" height="99" fill="var(--high)"/>
+        <text class="tot" x="588" y="42" text-anchor="middle">18</text>
+        <text x="588" y="230" text-anchor="middle">#18</text><text x="588" y="244" text-anchor="middle">gaps filed</text></g>
+      <g><!-- #20: C0 H6 M1 L6 = 13 -->
+        <rect x="650" y="156" width="44" height="54" fill="var(--low)"/>
+        <rect x="650" y="147" width="44" height="9" fill="var(--med)"/>
+        <rect x="650" y="93" width="44" height="54" fill="var(--high)"/>
+        <text class="tot" x="672" y="87" text-anchor="middle">13</text>
+        <text x="672" y="230" text-anchor="middle">#20</text><text x="672" y="244" text-anchor="middle">A-006</text></g>
+    </svg>
+  </div>
+  <div class="legend">
+    <span style="--sw: var(--crit)">Critical</span><span style="--sw: var(--high)">High</span>
+    <span style="--sw: var(--med)">Medium</span><span style="--sw: var(--low)">Low</span>
+  </div>
+</section>
+
+<section aria-labelledby="ledger">
+  <h2 id="ledger">What each merge changed</h2>
+  <p class="muted">Newest first. Proposal-only merges (#7–#10, #13, #15, #19) recorded decisions and are folded into the change that applied them.</p>
+  <div class="ledger">
+    <div class="row"><div class="pr">#20<small>2026-11-17</small></div><div class="body">
+      <h3>Every authority check has one exact answer (ADP-2 2.0.0)</h3>
+      <p>Path matching, the guardrail overlap test and how a grant is named in an instruction are now defined exactly. The human-signed record for creating or deleting a repository has a format and its own check. A grant missing a limiting field, or with an expiry outside UTC, is rejected. Five ADP-2 defects closed; ADP-2 has none open. Proposed and accepted in #19.</p>
+      <p class="bank"><b>For the bank:</b> two vendors' tools now give the same verdict on the CHG-4821 grant: <code>src/fees/round.py</code> is in scope, <code>src/../ci/hook</code> is refused, and a grant that forgets its protected list is rejected instead of silently allowing everything. Archiving the old fees repository needs a signed record naming exactly that one repository.</p></div></div>
+    <div class="row"><div class="pr">#18<small>2026-11-16</small></div><div class="body">
+      <h3>Known gaps written down</h3>
+      <p>Eight gaps found while building ADP-2 were filed with evidence, and a brittle CI test was fixed.</p>
+      <p class="bank"><b>For the bank:</b> the auditor gets a register of every known weakness, with proof, instead of a claim that everything is fine.</p></div></div>
+    <div class="row"><div class="pr">#17<small>2026-11-16</small></div><div class="body">
+      <h3>Who may ask an agent to do what (ADP-2)</h3>
+      <p>Grants: approval-rooted, session-bound permissions. Creating or deleting a repository needs a human signature scaled to risk. Approval and merge stay human.</p>
+      <p class="bank"><b>For the bank:</b> the change manager issues a grant for CHG-4821: read <code>docs/**</code>, write <code>src/fees/**</code>, today only, with CI and hooks protected. An instruction outside that scope is refused, and the agent cannot open a public repository on its own.</p></div></div>
+    <div class="row"><div class="pr">#16<small>2026-11-16</small></div><div class="body">
+      <h3>Extensions with a fixed home, and typo safety</h3>
+      <p>Teams can add their own fields in one place. Newer-version fields are tolerated; typos in known versions are rejected.</p>
+      <p class="bank"><b>For the bank:</b> <code>x-bank-change-ticket: CHG-4821</code> rides along without breaking anything. A misspelt <code>ignor: secrets/</code> is rejected, so an isolation boundary cannot silently disappear.</p></div></div>
+    <div class="row"><div class="pr">#14<small>2026-11-16</small></div><div class="body">
+      <h3>Version numbers checked exactly</h3>
+      <p>Only valid versions of the current major are accepted.</p>
+      <p class="bank"><b>For the bank:</b> an instruction written for a future, incompatible format is refused, so an older system does not misread it.</p></div></div>
+    <div class="row"><div class="pr">#12<small>2026-11-15</small></div><div class="body">
+      <h3>An answer key for conformance</h3>
+      <p>A public set of test cases with known correct answers, checked in CI on every change.</p>
+      <p class="bank"><b>For the bank:</b> procurement can test a vendor's agent tool against the answer key instead of trusting a conformance claim.</p></div></div>
+    <div class="row"><div class="pr">#11<small>2026-11-15</small></div><div class="body">
+      <h3>Rules mean what they say</h3>
+      <p>MUST and SHOULD follow the IETF definitions, and the validation rules became binding.</p>
+      <p class="bank"><b>For the bank:</b> compliance can tell a violation from a recommendation without asking the author.</p></div></div>
+    <div class="row"><div class="pr">#3–#6<small>2026-11-15</small></div><div class="body">
+      <h3>Change control on ADP itself</h3>
+      <p>A defect register, a proposal process, commit rules, hooks and CI. Nothing reaches main without a pull request and passing checks.</p>
+      <p class="bank"><b>For the bank:</b> the standard it relies on is itself under audited change control, with every decision traceable to a commit.</p></div></div>
+  </div>
+</section>
+
+<section aria-labelledby="next">
+  <h2 id="next">In review</h2>
+  <div class="q"><h3>Nothing in review</h3><span class="chip next">Next: ADP-1 highs</span>
+    <p>The 6 open high defects are all in ADP-1, the instruction format: whether <code>SOURCE</code> is a keyword, when a report may say <code>COMPLETE</code>, tier selection, schemas that reject envelopes no rule rejects, and a requirement stated as both MUST and SHOULD. They are the next work.</p></div>
+</section>
+
+<section class="limits" aria-labelledby="limits">
+  <h2 id="limits">What ADP does not do yet</h2>
+  <ul>
+    <li>No validator implementation exists. Every check above is specified and tested on paper and in CI, not enforced in a running system.</li>
+    <li>ADP-1 and ADP-2 are Drafts. ADP-2's checks are now exact, but nothing has been built or used against them yet.</li>
+    <li>ADP gives an auditor structured evidence. It does not by itself make a firm compliant with any regulation.</li>
+  </ul>
+</section>
+
+<footer>
+  <span>Source: <a href="https://github.com/praveenprk/adp-protocol">github.com/praveenprk/adp-protocol</a>. Defect counts are computed from <code>DEFECTS.md</code> at each merge commit.</span>
+  <span>The bank scenario is illustrative. It describes no real institution.</span>
+</footer>
+
+</div>
+</body>
+</html>
