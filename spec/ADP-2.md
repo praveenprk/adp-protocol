@@ -4,7 +4,7 @@
 |--------------|-----------------------------------------|
 | **ID**       | ADP-2                                   |
 | **Title**    | Dispatch Authority                      |
-| **Version**  | 1.0.0                                   |
+| **Version**  | 2.0.0                                   |
 | **Status**   | Draft                                   |
 | **License**  | Apache 2.0                              |
 | **Date**     | 2026-11-16                              |
@@ -86,14 +86,14 @@ map to below.
 |---|---|---|
 | `READ`, `context.read[]` | `AT-READ` | Each `path` MUST match `scope.read`. |
 | `IGNORE`, `context.ignore[]` | none | Narrows what the agent reads. Never needs authority. |
-| `CONFIRM` | `AT-READ`; also `AT-VERIFY` if checking the condition requires running anything | Asserts. Never writes. |
-| `PRODUCE`, `produce[]` | `AT-WRITE` | Each `path` MUST match `scope.write`. A `create` at the root of a new codebase implies `AT-CODEBASE-CREATE` instead. |
+| `CONFIRM` | `AT-READ` | Asserts. Never writes. |
+| `PRODUCE`, `produce[]` | `AT-WRITE` | Each `path` MUST match `scope.write` (§4.2). |
 | `BIND` | `AT-WRITE` | A bound decision is a written record. "Irreversible" in ADP-1 §3.1 locks the decision. It does not destroy anything. |
 | `SURFACE`, `DEFER`, `REPORT`, `report[]` | `AT-REPORT` | |
-| `EXIT`, `exit[]` | `AT-REPORT`; also `AT-VERIFY` if checking the condition requires running anything | |
+| `EXIT`, `exit[]` | `AT-REPORT` | |
 | `ANCHOR`, `dispatch.anchor[]` | none | Carries the grant reference (§4.1). |
-| *(no element)* | `AT-VCS`, `AT-TOOL` | Cannot be inferred from an ADP-1 envelope. Declared in the grant and enforced by the runtime (§6). |
-| *(no element)* | `AT-CODEBASE-DELETE` | ADP-1 has no delete action. A codebase delete cannot be dispatched under ADP-1. |
+| *(no element)* | `AT-VERIFY`, `AT-VCS`, `AT-TOOL` | Cannot be inferred from an ADP-1 envelope: whether a condition needs anything run is not visible in it. Declared in the grant and enforced by the runtime (§6). |
+| *(no element)* | `AT-CODEBASE-CREATE`, `AT-CODEBASE-DELETE` | Never inferred from a dispatch. A codebase event is authorised only by a record (§4.3, G-9) and enforced by the runtime (§6). |
 
 `SOURCE` is left out. Whether it is a keyword is open as ADP-D-001 and
 ADP-D-002. Either way it implies nothing.
@@ -103,7 +103,7 @@ ADP-D-002. Either way it implies nothing.
 ## 4. Grant document
 
 ```yaml
-adp_grant_version: "1.0.0"
+adp_grant_version: "2.0.0"
 grant:
   id: string              # unique, never reused
   session: string         # the session this grant is bound to
@@ -125,31 +125,87 @@ grant:
   protected: [string]     # globs; see G-7
 ```
 
+`adp_grant_version` is the ADP-2 version the grant follows, written as
+a SemVer 2.0.0 version.
+
+Every field shown is REQUIRED, with these exceptions:
+
+- `root` and `parent`: at least one is present;
+- each key under `scope`: an absent list grants nothing.
+
+`expires_at` is an RFC 3339 date-time in UTC, ending in `Z`. Unknown
+fields are ignored. Every field that limits authority is required, so
+a misspelt field fails closed.
+
 ### 4.1 Binding a dispatch to a grant
 
 A dispatch is bound to a grant by listing the grant `id` in
 `dispatch.anchor`. ADP-1 already requires that field and defines it as the
 "traceable governing reference", so the binding needs no change to ADP-1.
 
+An entry of `dispatch.anchor` is a grant id when it equals the `id` of a
+grant in the grant chain given to the validator (§6). Every other entry
+is an ordinary reference.
+
+### 4.2 Paths and globs
+
+A path is relative, uses `/` between segments, and is compared byte for
+byte. A path with a leading `/`, an empty segment, or a `.` or `..`
+segment matches no glob.
+
+A glob is a path whose segments may contain `*`, which matches any run
+of characters within one segment, including none. A segment that is
+exactly `**` matches zero or more whole segments. No other character is
+special. `scope.read`, `scope.write`, `scope.branches` and `protected`
+are lists of globs. A path matches a list when it matches any glob in it.
+
+Two globs overlap when one's literal prefix equals the other's or is a
+leading run of segments of it. A literal prefix is the run of segments
+before the first segment that contains `*`. Two lists overlap when any
+pair of their globs overlaps. This test may report an overlap where no
+single path matches both globs. It never misses one.
+
+### 4.3 Codebase event record
+
+```yaml
+adp_record_version: "2.0.0"
+record:
+  id: string              # unique, never reused
+  classes: [string]       # event classes (§2.1), at least one
+  boundary:
+    sandbox_roots: [string]
+    namespaces: [string]
+    codebases: [string]
+    max_events: integer   # optional, at least 1
+  span: string            # "event" | "session" | "cycle"
+  signed_by: string
+  signature: string
+```
+
+Every field is REQUIRED except `max_events`, and except the three
+`boundary` lists, of which at least one is present.
+`adp_record_version` follows the rule for `adp_grant_version` (§4).
+A record is not a grant and never appears in a grant chain.
+
 ---
 
 ## 5. Invariants
 
-- **G-1** A dispatch MUST list exactly one grant id in `dispatch.anchor`.
+- **G-1** A dispatch MUST list exactly one grant id (§4.1) in `dispatch.anchor`.
 - **G-2** `grant.types` MUST contain only grantable types. A grant that
   lists a human-signed type, or anything §2 says is not an automation type,
   is invalid.
 - **G-3** The types a dispatch implies (§3) MUST be a subset of the
   `types` of the grant it lists.
 - **G-4** Every `context.read[].path` MUST match `scope.read`. Every
-  `produce[].path` MUST match `scope.write`.
+  `produce[].path` MUST match `scope.write`. Matching follows §4.2.
 - **G-5** Delegation only narrows. In a child grant, `types` and each
   `scope` list MUST be subsets of the parent's, `protected` MUST be a
   superset of the parent's, and `expires_at` MUST NOT be later than the
   parent's.
 - **G-6** Following `parent` links MUST reach, within 5 hops, a grant
   whose `root` is a human-signed record.
-- **G-7** `scope.write` MUST NOT overlap `protected`. `protected` MUST
+- **G-7** `scope.write` MUST NOT overlap `protected` (§4.2). `protected` MUST
   cover at least the paths where grants are stored and the paths of the
   enforcing runtime, such as hooks, guards, routing tables and agent
   contracts. An agent is never granted write access to its own guardrails.
@@ -157,7 +213,7 @@ A dispatch is bound to a grant by listing the grant `id` in
   whichever comes first. A grant is never renewed. Continuing requires a
   new grant with a new root.
 - **G-9** An agent MAY carry out a codebase event (§2.1) only under a
-  human-signed record that is not a grant. The record MUST state:
+  human-signed record that is not a grant. The record (§4.3) MUST state:
   - `classes`: the event classes it covers;
   - `boundary`: the sandbox roots, namespaces or exact codebases it covers,
     plus an optional maximum event count;
@@ -174,18 +230,25 @@ A dispatch is bound to a grant by listing the grant `id` in
 
   An `event` record names exactly one codebase and is used once. A record
   whose `span` is wider than its radius allows is invalid.
+- **G-10** A grant MUST follow §4: every required field present,
+  `expires_at` in UTC, and `adp_grant_version` a SemVer 2.0.0 version
+  whose major version the validator implements.
 
 ---
 
 ## 6. Validation and enforcement
 
-- **Validator.** `validate(dispatch, grant_chain)` is a pure function,
-  like ADP-1 §7. It checks G-1 to G-7 and G-9 against the documents it is
-  given. It checks that a signature field is present and well-formed. It
-  verifies a signature only when the caller supplies the key.
+- **Validators.** Two pure functions, like ADP-1 §7:
+  - `validate(dispatch, grant_chain)` checks G-1 to G-7 and G-10.
+    `grant_chain` is the grant the dispatch lists and its ancestors.
+  - `validate_record(record)` checks G-9 and the record format (§4.3).
+
+  Each checks that signature fields are present and non-empty. A
+  signature is verified only when the caller supplies the key.
 - **Runtime.** Everything that cannot be seen in the documents is the
-  job of the executing system: `AT-VCS`, `AT-TOOL`, G-8, and what the agent
-  actually does on disk. A valid dispatch proves that the orchestrator
+  job of the executing system: `AT-VERIFY`, `AT-VCS`, `AT-TOOL`,
+  codebase events against their records (G-9), the coverage clause of G-7,
+  G-8, and what the agent actually does on disk. A valid dispatch proves that the orchestrator
   *asked* within its authority. It does not prove that the agent *acted*
   within it.
 
@@ -213,3 +276,8 @@ human's view of the work.
 | Date       | Change                                          |
 |------------|-------------------------------------------------|
 | 2026-11-16 | 1.0.0. Initial Draft. ADP-A-002.                |
+| 2026-11-16 | 2.0.0. Grant id, paths, globs and overlap       |
+|            | defined (§4.1, §4.2); codebase event record and |
+|            | validate_record (§4.3, §6); AT-VERIFY and       |
+|            | codebase events not inferred (§3); G-10.        |
+|            | ADP-A-006, resolves ADP-D-018 to ADP-D-022.     |

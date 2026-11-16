@@ -1,0 +1,26 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-2",
+    "since": "2.0.0",
+    "kind": "record"
+  },
+  "rules": [
+    "G-9"
+  ],
+  "expect": "fail",
+  "description": "Record whose boundary is empty. At least one of sandbox_roots, namespaces or codebases is required (§4.3).",
+  "input": {
+    "adp_record_version": "2.0.0",
+    "record": {
+      "id": "record-9",
+      "classes": [
+        "CREATE-SCRATCH"
+      ],
+      "boundary": {},
+      "span": "cycle",
+      "signed_by": "maintainer",
+      "signature": "sig-9"
+    }
+  }
+}

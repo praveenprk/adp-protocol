@@ -79,6 +79,8 @@ adp-protocol/
 ├── spec/ADP-2.md              # Dispatch authority (grants, Draft)
 ├── schema/
 │   ├── dispatch.schema.json   # Dispatch envelope schema
+│   ├── grant.schema.json      # Grant document schema (ADP-2 §4)
+│   ├── record.schema.json     # Codebase event record schema (ADP-2 §4.3)
 │   └── report.schema.json     # Report envelope schema
 ├── conformance/               # Conformance vectors (ADP-0 §5.6)
 ├── python/adp/                # Python reference implementation

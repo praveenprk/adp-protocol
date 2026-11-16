@@ -2,8 +2,8 @@
   "adp_conformance": "1",
   "target": {
     "doc": "ADP-2",
-    "since": "1.0.0",
-    "kind": "codebase-record"
+    "since": "2.0.0",
+    "kind": "record"
   },
   "rules": [
     "G-9"
@@ -11,7 +11,9 @@
   "expect": "fail",
   "description": "Record with span event that names two codebases; an event record names exactly one.",
   "input": {
+    "adp_record_version": "2.0.0",
     "record": {
+      "id": "record-1",
       "classes": [
         "ARCHIVE"
       ],

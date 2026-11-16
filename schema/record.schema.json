@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adp-protocol.dev/schema/record.schema.json",
+  "title": "ADP Codebase Event Record",
+  "description": "Human-signed record that authorises codebase events per ADP-2 §4.3",
+  "$comment": "Checks the record format (ADP-2 §4.3) and G-9 in full. Whether an event that happened matches a record is checked by the runtime (ADP-2 §6), not by this schema.",
+  "type": "object",
+  "required": ["adp_record_version", "record"],
+  "properties": {
+    "adp_record_version": {
+      "type": "string",
+      "pattern": "^2\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(-(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)(\\.(0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*))*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(?![\\s\\S])",
+      "description": "ADP-2 version the record follows: SemVer 2.0.0 with major version 2 (ADP-2 §4.3)",
+      "$comment": "Ends with (?![\\s\\S]), not $: in Python re, $ also matches before a final newline. [0-9], not \\d: in Python re, \\d matches non-ASCII digits."
+    },
+    "record": {
+      "type": "object",
+      "required": ["id", "classes", "boundary", "span", "signed_by", "signature"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique, never reused"
+        },
+        "classes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["CREATE-SCRATCH", "CREATE-PRIVATE", "CREATE-PUBLIC", "DELETE-SCRATCH", "ARCHIVE", "DELETE"]
+          },
+          "description": "Event classes (ADP-2 §2.1), at least one"
+        },
+        "boundary": {
+          "type": "object",
+          "anyOf": [
+            { "required": ["sandbox_roots"] },
+            { "required": ["namespaces"] },
+            { "required": ["codebases"] }
+          ],
+          "properties": {
+            "sandbox_roots": { "$ref": "#/$defs/Strings" },
+            "namespaces": { "$ref": "#/$defs/Strings" },
+            "codebases": { "$ref": "#/$defs/Strings" },
+            "max_events": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Optional maximum event count"
+            }
+          },
+          "description": "At least one of sandbox_roots, namespaces, codebases (ADP-2 §4.3)"
+        },
+        "span": {
+          "type": "string",
+          "enum": ["event", "session", "cycle"],
+          "description": "Required, no default (G-9)"
+        },
+        "signed_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "signature": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "$comment": "G-9: a class of radius R3 allows span event only.",
+          "if": {
+            "required": ["classes"],
+            "properties": { "classes": { "contains": { "enum": ["CREATE-PUBLIC", "DELETE"] } } }
+          },
+          "then": { "properties": { "span": { "const": "event" } } }
+        },
+        {
+          "$comment": "G-9: a class of radius R2 allows span event or session.",
+          "if": {
+            "required": ["classes"],
+            "properties": { "classes": { "contains": { "enum": ["CREATE-PRIVATE", "ARCHIVE"] } } }
+          },
+          "then": { "properties": { "span": { "enum": ["event", "session"] } } }
+        },
+        {
+          "$comment": "G-9: an event record names exactly one codebase and no other boundary list.",
+          "if": {
+            "required": ["span"],
+            "properties": { "span": { "const": "event" } }
+          },
+          "then": {
+            "properties": {
+              "boundary": {
+                "required": ["codebases"],
+                "not": { "anyOf": [ { "required": ["sandbox_roots"] }, { "required": ["namespaces"] } ] },
+                "properties": { "codebases": { "minItems": 1, "maxItems": 1 } }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "Strings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}
