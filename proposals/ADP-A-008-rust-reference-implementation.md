@@ -338,3 +338,5 @@ with the version map, both changelogs, and tag `adp-v0.2.0` after merge.
 ---
 
 ## Decision
+ACCEPTED 2026-11-18 by the maintainer (ADP-0 §5.3). Apply as written,
+with the answers recorded under the questions for the maintainer.
