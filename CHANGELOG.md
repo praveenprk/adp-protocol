@@ -1,6 +1,7 @@
 # Changelog
 
-Release notes for each ADP document version. Newest first.
+Release notes for each ADP document version, then every change to the
+repository since its first commit. Newest first.
 
 - **Normative history:** the spec's own Revision Log. If this file and a
   spec disagree, the spec wins (ADP-0 §3).
@@ -45,9 +46,44 @@ Release notes for each ADP document version. Newest first.
 
 ---
 
+## Repository history
+
+Every change merged to `main`, from the first commit. Dates are commit
+dates on `main`.
+
+| Date | PR | Kind | Change | Versions |
+|------|----|------|--------|----------|
+| 2026-11-17 | #23 | Docs | This changelog. Tags `adp-0/v1.0.0` … `adp-2/v2.0.1` and pre-release GitHub Releases created for every version below. | — |
+| 2026-11-17 | #22 | Apply | ADP-A-007: ADP-1 text matches its validation contract. 15 vectors (68 ADP-1), new V-13, R-12, R-13 (26 rules), R-13 in `report.schema.json`. CI self-test fixed to not depend on one defect's status. 7 defects resolved, 6 open, none high. | ADP-1 1.1.1, ADP-2 2.0.1 |
+| 2026-11-17 | #21 | Proposal | ADP-A-007 drafted and ACCEPTED, with a Scenarios table. | — |
+| 2026-11-17 | #20 | Apply | ADP-A-006: decidable ADP-2 authority checks. `schema/grant.schema.json` updated, new `schema/record.schema.json`, CI checks ADP-2 grant and record vectors (33). 5 defects resolved. | ADP-2 2.0.0 |
+| 2026-11-16 | #19 | Proposal | ADP-A-006 drafted and ACCEPTED. | — |
+| 2026-11-16 | #18 | Defects | ADP-D-018 to ADP-D-025 filed: gaps found in ADP-2 and ADP-1. CI test defect IDs derived from the register. | — |
+| 2026-11-16 | #17 | Apply | ADP-A-002: new document ADP-2 Dispatch Authority, `schema/grant.schema.json`, first ADP-2 vectors. | ADP-2 1.0.0 |
+| 2026-11-16 | #16 | Apply | ADP-A-005: extensions in `metadata`, version-gated unknown fields, new V-12, R-10, R-11. 3 defects resolved. | ADP-1 1.1.0 |
+| 2026-11-16 | #15 | Proposal | ADP-A-005 drafted and ACCEPTED. | — |
+| 2026-11-16 | #14 | Apply | ADP-A-004: `adp_version` SemVer grammar, major-version check V-11, R-09. 2 defects resolved. | ADP-1 1.0.2 |
+| 2026-11-15 | #13 | Proposal | ADP-A-004 drafted and ACCEPTED. | — |
+| 2026-11-15 | #12 | Apply | ADP-A-003: conformance suite format (ADP-0 §5.6), first ADP-1 vectors, `check_conformance.py` in CI. | ADP-0 1.1.0 |
+| 2026-11-15 | #11 | Apply | ADP-A-001: BCP 14 key words; §7 rules bind validators. 1 defect resolved. | ADP-1 1.0.1 |
+| 2026-11-15 | #10 | Proposal | ADP-A-002 decision recorded: ACCEPTED. | — |
+| 2026-11-15 | #9 | Proposal | ADP-A-003 drafted and ACCEPTED. | — |
+| 2026-11-15 | #8 | Proposal | ADP-A-002 (authorised automation types) drafted. | — |
+| 2026-11-15 | #7 | Proposal | ADP-A-001 drafted and ACCEPTED. | — |
+| 2026-11-15 | #6 | CI | CI jobs: commit format, schema validity, schema-change gate (needs an ACCEPTED proposal), defect register rules, and a self-test of these checks. | — |
+| 2026-11-15 | #5 | Tooling | `commit-msg` and `pre-push` hooks with ADP anchors. | — |
+| 2026-11-15 | #4 | Governance | `AGENTS.md` repository rules and `CLAUDE.md` adapter. | — |
+| 2026-11-15 | #3 | Governance | ADP-0 adopted; defect register seeded with ADP-D-001 to ADP-D-017. | ADP-0 1.0.0 |
+| 2026-11-15 | #2 | Spec | Full ADP-1 normative text restored; `dispatch.schema.json`, `report.schema.json` and tier 1–3 examples added. | ADP-1 1.0.0 |
+| 2026-11-15 | #1 | Legal | Apache 2.0 `LICENSE`. | — |
+| 2026-06-26 | — | Spec | First commit (`07bae4c`): ADP-1 specification draft and README. | — |
+
+---
+
 ## Adding a release
 
-In every PR that changes a document's version:
+In every PR, add a row at the top of **Repository history**. In a PR
+that also changes a document's version:
 
 1. Add a row at the top of that document's table, and update **Latest**.
 2. After the maintainer merges, tag the merge commit `adp-N/vX.Y.Z` and
