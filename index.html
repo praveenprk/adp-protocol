@@ -104,7 +104,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <div class="eyebrow">Agent Dispatch Protocol · progress</div>
   <h1>ADP Progress Ledger</h1>
   <p>What each merged change made possible, told through one regulated scenario: a bank using an AI coding agent on payment code.</p>
-  <div class="asof">As of main <span class="id">b294d04</span> · 2026-11-17 · nothing in review</div>
+  <div class="asof">As of main <span class="id">0f5dbfd</span> · 2026-11-17 · 1 proposal in review</div>
 </header>
 
 <section aria-labelledby="now">
@@ -112,7 +112,7 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <div class="status">
     <div class="tile"><span class="k">ADP-1 · instruction format</span><span class="v">1.1.1 · no high defects</span><span class="d">Started with 4 critical defects. All critical and high ones fixed. 68 test vectors, 26 rules; every rule the schemas apply is now written in the spec.</span></div>
     <div class="tile"><span class="k">ADP-2 · who may ask for what</span><span class="v">2.0.1 Draft · no open defects</span><span class="d">Every check now has one exact answer. 33 test vectors; CI verifies the grant and record answers.</span></div>
-    <div class="tile"><span class="k">Validator software</span><span class="v">Not built yet</span><span class="d">ADP is a specification plus an answer key. No product runs it today.</span></div>
+    <div class="tile"><span class="k">Validator software</span><span class="v">Not built yet · proposed</span><span class="d">ADP-A-008 (in review) proposes a Rust reference validator that must pass every published test case.</span></div>
     <div class="tile"><span class="k">Known defects, open</span><span class="v">6 · 0 critical, 0 high</span><span class="d">1 medium, 5 low. Every one is written down with evidence.</span></div>
   </div>
 </section>
@@ -219,6 +219,10 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <h2 id="ledger">What each merge changed</h2>
   <p class="muted">Newest first. Proposal-only merges (#7–#10, #13, #15, #19, #21) recorded decisions and are folded into the change that applied them.</p>
   <div class="ledger">
+    <div class="row"><div class="pr">#23<small>2026-11-17</small></div><div class="body">
+      <h3>Release notes and version tags</h3>
+      <p><code>CHANGELOG.md</code> lists every version of ADP-0, ADP-1 and ADP-2 with its upgrade impact, and every change since the first commit. Each version has a tag and a pre-release GitHub Release.</p>
+      <p class="bank"><b>For the bank:</b> the policy can pin "ADP-1 1.1.1" to a fixed tag, and the upgrade note says exactly what changes: a <code>COMPLETE</code> report with a failed check is now rejected.</p></div></div>
     <div class="row"><div class="pr">#22<small>2026-11-17</small></div><div class="body">
       <h3>The instruction format says exactly what its checks enforce (ADP-1 1.1.1)</h3>
       <p>Every rule the published schemas apply is now written in the spec, so a validator built from the text gives the same verdict. <code>SOURCE</code> is a field, not a keyword. A <code>COMPLETE</code> report with a failed check is rejected. Tier choice is guidance, with one tie-break rule. Seven defects closed, including all six high ones. Proposed and accepted in #21.</p>
@@ -260,8 +264,8 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 <section aria-labelledby="next">
   <h2 id="next">In review</h2>
-  <div class="q"><h3>Nothing in review</h3><span class="chip next">Next: release notes, Rust validator</span>
-    <p>No high or critical defect is open. Next: release notes for each ADP version, and ADP-A-008, a reference validator in Rust that must pass every published test case. The remaining 6 defects are 1 medium (compression ranges need measured data) and 5 low.</p></div>
+  <div class="q"><h3>#24 · ADP-A-008: Rust reference validator</h3><span class="chip next">Awaiting decision</span>
+    <p>One Rust library that checks instructions, reports, grants and records, run in CI against every published test case, naming the exact rule that fails. It would check the 19 ADP-2 authority test cases for the first time. No high or critical defect is open; 1 medium and 5 low remain.</p></div>
 </section>
 
 <section class="limits" aria-labelledby="limits">
