@@ -425,3 +425,5 @@ published schemas. No existing vector changes verdict.
 ---
 
 ## Decision
+ACCEPTED 2026-11-17 by the maintainer (ADP-0 §5.3). Apply as written,
+with the answers recorded under the questions for the maintainer.
