@@ -104,16 +104,16 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   <div class="eyebrow">Agent Dispatch Protocol · progress</div>
   <h1>ADP Progress Ledger</h1>
   <p>What each merged change made possible, told through one regulated scenario: a bank using an AI coding agent on payment code.</p>
-  <div class="asof">As of main <span class="id">f6fd6ca</span> · 2026-11-17 · nothing in review</div>
+  <div class="asof">As of main <span class="id">b294d04</span> · 2026-11-17 · nothing in review</div>
 </header>
 
 <section aria-labelledby="now">
   <h2 id="now">Where ADP stands</h2>
   <div class="status">
-    <div class="tile"><span class="k">ADP-1 · instruction format</span><span class="v">1.1.0 · no critical defects</span><span class="d">Started with 4 critical defects. All fixed. 53 test vectors. All 6 open high defects are here.</span></div>
-    <div class="tile"><span class="k">ADP-2 · who may ask for what</span><span class="v">2.0.0 Draft · no open defects</span><span class="d">Every check now has one exact answer. 33 test vectors; CI verifies the grant and record answers.</span></div>
+    <div class="tile"><span class="k">ADP-1 · instruction format</span><span class="v">1.1.1 · no high defects</span><span class="d">Started with 4 critical defects. All critical and high ones fixed. 68 test vectors, 26 rules; every rule the schemas apply is now written in the spec.</span></div>
+    <div class="tile"><span class="k">ADP-2 · who may ask for what</span><span class="v">2.0.1 Draft · no open defects</span><span class="d">Every check now has one exact answer. 33 test vectors; CI verifies the grant and record answers.</span></div>
     <div class="tile"><span class="k">Validator software</span><span class="v">Not built yet</span><span class="d">ADP is a specification plus an answer key. No product runs it today.</span></div>
-    <div class="tile"><span class="k">Known defects, open</span><span class="v">13 · 0 critical</span><span class="d">6 high, 1 medium, 6 low. Every one is written down with evidence.</span></div>
+    <div class="tile"><span class="k">Known defects, open</span><span class="v">6 · 0 critical, 0 high</span><span class="d">1 medium, 5 low. Every one is written down with evidence.</span></div>
   </div>
 </section>
 
@@ -129,21 +129,21 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
     <div class="q"><h3>Could the agent change its own controls?</h3><span class="chip warn">Partly</span>
       <p>No grant may let an agent write to its own guardrails: CI, hooks, grant storage (G-7). The overlap test is now defined and errs toward refusing, and a path like <code>src/../ci/hook</code> matches nothing. Enforcement on disk is the runtime's job, and no runtime exists yet.</p></div>
     <div class="q"><h3>Can all of this be proven afterwards?</h3><span class="chip no">Not yet</span>
-      <p>The instruction, the grant and the human-signed repository record can each be checked by machine against published test cases, so the paperwork is solid. Proving what the agent actually did needs a runtime and a validator, and neither exists yet.</p></div>
+      <p>A report that says <code>COMPLETE</code> while a check failed is now rejected, so "done" means every agreed check passed. The instruction, the grant and the human-signed repository record can each be checked by machine against published test cases, so the paperwork is solid. Proving what the agent actually did needs a runtime and a validator, and neither exists yet.</p></div>
   </div>
 </section>
 
 <section aria-labelledby="trend">
   <h2 id="trend">Open defects after each change</h2>
   <p class="muted">Counted from <code>DEFECTS.md</code> at each merge commit on main. A rise at #18 is new gaps being written down, not new breakage.</p>
-  <div class="chart" role="img" aria-label="Stacked bars of open defects by severity at eight merges. Critical falls from 4 to 0 by PR 16. Total is 16 at baseline, 15 after PR 11, 13 after PR 14, 10 after PR 16 and 17, 18 after PR 18, and 13 after PR 20.">
-    <svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg">
+  <div class="chart" role="img" aria-label="Stacked bars of open defects by severity at nine merges. Critical falls from 4 to 0 by PR 16. Total is 16 at baseline, 15 after PR 11, 13 after PR 14, 10 after PR 16 and 17, 18 after PR 18, 13 after PR 20, and 6 after PR 22.">
+    <svg viewBox="0 0 800 250" xmlns="http://www.w3.org/2000/svg">
       <!-- scale: y = 210 - n*9 ; 0..20 -->
-      <line class="grid" x1="40" y1="210" x2="710" y2="210"/>
-      <line class="grid" x1="40" y1="165" x2="710" y2="165"/>
-      <line class="grid" x1="40" y1="120" x2="710" y2="120"/>
-      <line class="grid" x1="40" y1="75" x2="710" y2="75"/>
-      <line class="grid" x1="40" y1="30" x2="710" y2="30"/>
+      <line class="grid" x1="40" y1="210" x2="790" y2="210"/>
+      <line class="grid" x1="40" y1="165" x2="790" y2="165"/>
+      <line class="grid" x1="40" y1="120" x2="790" y2="120"/>
+      <line class="grid" x1="40" y1="75" x2="790" y2="75"/>
+      <line class="grid" x1="40" y1="30" x2="790" y2="30"/>
       <text x="32" y="214" text-anchor="end">0</text>
       <text x="32" y="169" text-anchor="end">5</text>
       <text x="32" y="124" text-anchor="end">10</text>
@@ -202,6 +202,11 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         <rect x="650" y="93" width="44" height="54" fill="var(--high)"/>
         <text class="tot" x="672" y="87" text-anchor="middle">13</text>
         <text x="672" y="230" text-anchor="middle">#20</text><text x="672" y="244" text-anchor="middle">A-006</text></g>
+      <g><!-- #22: C0 H0 M1 L5 = 6 -->
+        <rect x="734" y="165" width="44" height="45" fill="var(--low)"/>
+        <rect x="734" y="156" width="44" height="9" fill="var(--med)"/>
+        <text class="tot" x="756" y="150" text-anchor="middle">6</text>
+        <text x="756" y="230" text-anchor="middle">#22</text><text x="756" y="244" text-anchor="middle">A-007</text></g>
     </svg>
   </div>
   <div class="legend">
@@ -212,8 +217,12 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 <section aria-labelledby="ledger">
   <h2 id="ledger">What each merge changed</h2>
-  <p class="muted">Newest first. Proposal-only merges (#7–#10, #13, #15, #19) recorded decisions and are folded into the change that applied them.</p>
+  <p class="muted">Newest first. Proposal-only merges (#7–#10, #13, #15, #19, #21) recorded decisions and are folded into the change that applied them.</p>
   <div class="ledger">
+    <div class="row"><div class="pr">#22<small>2026-11-17</small></div><div class="body">
+      <h3>The instruction format says exactly what its checks enforce (ADP-1 1.1.1)</h3>
+      <p>Every rule the published schemas apply is now written in the spec, so a validator built from the text gives the same verdict. <code>SOURCE</code> is a field, not a keyword. A <code>COMPLETE</code> report with a failed check is rejected. Tier choice is guidance, with one tie-break rule. Seven defects closed, including all six high ones. Proposed and accepted in #21.</p>
+      <p class="bank"><b>For the bank:</b> the agent's report for CHG-4821 cannot say <code>COMPLETE</code> while "auditor review recorded" is false; it must say <code>BLOCKED</code> and give the reason. A produce entry with no file path is rejected by every vendor's tool, not just some, and the change's origin is always found in one field: <code>source</code>.</p></div></div>
     <div class="row"><div class="pr">#20<small>2026-11-17</small></div><div class="body">
       <h3>Every authority check has one exact answer (ADP-2 2.0.0)</h3>
       <p>Path matching, the guardrail overlap test and how a grant is named in an instruction are now defined exactly. The human-signed record for creating or deleting a repository has a format and its own check. A grant missing a limiting field, or with an expiry outside UTC, is rejected. Five ADP-2 defects closed; ADP-2 has none open. Proposed and accepted in #19.</p>
@@ -251,8 +260,8 @@ a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 <section aria-labelledby="next">
   <h2 id="next">In review</h2>
-  <div class="q"><h3>Nothing in review</h3><span class="chip next">Next: ADP-1 highs</span>
-    <p>The 6 open high defects are all in ADP-1, the instruction format: whether <code>SOURCE</code> is a keyword, when a report may say <code>COMPLETE</code>, tier selection, schemas that reject envelopes no rule rejects, and a requirement stated as both MUST and SHOULD. They are the next work.</p></div>
+  <div class="q"><h3>Nothing in review</h3><span class="chip next">Next: release notes, Rust validator</span>
+    <p>No high or critical defect is open. Next: release notes for each ADP version, and ADP-A-008, a reference validator in Rust that must pass every published test case. The remaining 6 defects are 1 medium (compression ranges need measured data) and 5 low.</p></div>
 </section>
 
 <section class="limits" aria-labelledby="limits">
