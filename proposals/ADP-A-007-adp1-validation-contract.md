@@ -33,6 +33,23 @@ change (see Application).
 
 ---
 
+## Scenarios
+
+One job throughout: a bank's orchestrator dispatches an agent to fix
+a loan-interest rounding bug from `LOAN-12 §4`. The agent edits
+`interest.rs`. EXIT: "tests pass", "auditor review recorded".
+
+| Q | Envelope | Today | With the recommendation | With the alternative |
+|---|----------|-------|-------------------------|----------------------|
+| Q1 | Origin written as `keyword: SOURCE`, as `source:` and as `x-bank-source:` | Three valid places. An auditor's tool that searches one of them misses the others. | One place: `source: "LOAN-12 §4"`. The `SOURCE` keyword fails V-08. | 11th keyword: Major bump; every 1.x validator rejects it. |
+| Q2 | `status: COMPLETE`, "auditor review recorded" `result: false` | Valid. The job shows as done without the review. | Fails R-13. The agent reports `BLOCKED` with the reason. | "Done" stays unchecked. |
+| Q3 | `produce: [{action: modify}]`, no `path` | The schema rejects it; §7 does not. Validators built from the text accept it. | Fails V-13. Every validator agrees and names the rule. | The schema and the text disagree; "conformant" depends on the vendor. |
+| Q4 | Work items `BIND` (pick a rounding method) + `CONFIRM` (tests) | The table gives tier 1 and tier 2. | Tier 1: lowest wins. Informative; validators check only 1–3 (V-10). | A validator tier rule: envelopes valid today fail (Major). |
+| Q5 | The dispatch repeats the commit format from a READ document | Both MUST NOT and SHOULD. | SHOULD NOT; validators do not check it. | A MUST that nothing can check. |
+| Q6 | Any envelope the published schemas accept today | n/a | Still accepted, except the Q2 case. Patch: 1.1.1 / 2.0.1. | Major: a breaking-change signal with nothing broken. |
+
+---
+
 ## Anchor
 
 All seven defects share one root: ADP-1 §7 says "A validator MUST reject
@@ -381,12 +398,12 @@ published schemas. No existing vector changes verdict.
 
 | # | Question | Recommendation (setting and reason) | Maintainer answer | Effect on this draft |
 |---|----------|-------------------------------------|-------------------|----------------------|
-| Q1 | Is `SOURCE` a keyword (ADP-D-001, ADP-D-002)? | **No. The origin of a work item is the `source` field; `SOURCE` leaves the keyword table.** The keyword count, the schema and §3.5's freeze already say 10 (A1 rejected). | | |
-| Q2 | What does `COMPLETE` require (ADP-D-008)? | **Every `exit_results[].result` is `true` (new R-13).** It is what §5.3 already says, and it is decidable from the report (A2 rejected). | | |
-| Q3 | How are field types and entry fields made part of the contract (ADP-D-024)? | **Write them down as §4.5 and §5.5, exactly as the published schemas enforce them, checked by new V-13 and R-12. `action` stays optional.** No published verdict changes (A3, A4 rejected). | | |
-| Q4 | How is the tier contradiction resolved (ADP-D-010, ADP-D-013)? | **Tier selection becomes informative; the "mix BIND + CONFIRM" row goes; when signals conflict, the lowest tier wins. The tier 3 example's `BIND` becomes `PRODUCE`.** Tier choice is the orchestrator's judgment (A5 rejected). | | |
-| Q5 | MUST NOT or SHOULD NOT for deduplication (ADP-D-025)? | **SHOULD NOT, and §8 says validators do not check it.** It cannot be checked from an envelope (A6 rejected). | | |
-| Q6 | Bump class and bundling? | **One proposal; Patch for both: ADP-1 1.1.1, ADP-2 2.0.1.** Every part is an erratum, a reclassification, or a clarification with no change to any published schema verdict except R-13, which §5.3 already required (A7 rejected). | | |
+| Q1 | Is `SOURCE` a keyword (ADP-D-001, ADP-D-002)? | **No. The origin of a work item is the `source` field; `SOURCE` leaves the keyword table.** The keyword count, the schema and §3.5's freeze already say 10 (A1 rejected). | Accepted the recommendation, as written in this column. Maintainer: "all as rec" (2026-11-17). | Settled as drafted. |
+| Q2 | What does `COMPLETE` require (ADP-D-008)? | **Every `exit_results[].result` is `true` (new R-13).** It is what §5.3 already says, and it is decidable from the report (A2 rejected). | Accepted the recommendation, as written in this column. Maintainer: "all as rec" (2026-11-17). | Settled as drafted. |
+| Q3 | How are field types and entry fields made part of the contract (ADP-D-024)? | **Write them down as §4.5 and §5.5, exactly as the published schemas enforce them, checked by new V-13 and R-12. `action` stays optional.** No published verdict changes (A3, A4 rejected). | Accepted the recommendation, as written in this column. Maintainer: "all as rec" (2026-11-17). | Settled as drafted. |
+| Q4 | How is the tier contradiction resolved (ADP-D-010, ADP-D-013)? | **Tier selection becomes informative; the "mix BIND + CONFIRM" row goes; when signals conflict, the lowest tier wins. The tier 3 example's `BIND` becomes `PRODUCE`.** Tier choice is the orchestrator's judgment (A5 rejected). | Accepted the recommendation, as written in this column. Maintainer: "all as rec" (2026-11-17). | Settled as drafted. |
+| Q5 | MUST NOT or SHOULD NOT for deduplication (ADP-D-025)? | **SHOULD NOT, and §8 says validators do not check it.** It cannot be checked from an envelope (A6 rejected). | Accepted the recommendation, as written in this column. Maintainer: "all as rec" (2026-11-17). | Settled as drafted. |
+| Q6 | Bump class and bundling? | **One proposal; Patch for both: ADP-1 1.1.1, ADP-2 2.0.1.** Every part is an erratum, a reclassification, or a clarification with no change to any published schema verdict except R-13, which §5.3 already required (A7 rejected). | Accepted the recommendation, as written in this column. Maintainer: "all as rec" (2026-11-17). | Settled as drafted. |
 
 ---
 
