@@ -1,0 +1,39 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.1.1",
+    "kind": "report"
+  },
+  "rules": [
+    "R-13"
+  ],
+  "expect": "pass",
+  "description": "BLOCKED report with a failed exit result and a blocker item; R-13 applies only to COMPLETE.",
+  "input": {
+    "adp_version": "1.0.0",
+    "report": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ],
+      "status": "BLOCKED"
+    },
+    "exit_results": [
+      {
+        "condition": "tests pass",
+        "result": false
+      }
+    ],
+    "items": [
+      {
+        "key": "commit_hash",
+        "value": "abc"
+      },
+      {
+        "key": "blocker",
+        "value": "no DB access"
+      }
+    ]
+  }
+}

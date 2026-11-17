@@ -26,7 +26,7 @@ produce:
     action: "modify"
 
 work_items:
-  - keyword: "BIND"
+  - keyword: "PRODUCE"
     description: "replace VIOLATES edge deletion with OVERRIDES edge creation per DESIGN Seam 4 shape"
 
 exit:

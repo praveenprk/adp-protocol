@@ -4,10 +4,10 @@
 |--------------|-----------------------------------------|
 | **ID**       | ADP-1                                   |
 | **Title**    | Agent Dispatch Protocol                 |
-| **Version**  | 1.1.0                                   |
+| **Version**  | 1.1.1                                   |
 | **Status**   | Draft                                   |
 | **License**  | Apache 2.0                              |
-| **Date**     | 2026-11-16                              |
+| **Date**     | 2026-11-17                              |
 
 ---
 
@@ -110,8 +110,9 @@ structural directive with defined semantics.
 | Keyword     | Semantics                                      |
 |-------------|-------------------------------------------------|
 | `ANCHOR`    | Traceable governing reference for this dispatch.|
-| `SOURCE`    | Origin section in governing document that       |
-|             | motivates a specific work item.                 |
+
+The origin of a work item in a governing document is carried in the
+work item's `source` field (§4.3). `SOURCE` is not a keyword.
 
 ### 3.5 Extensibility
 
@@ -129,9 +130,9 @@ digits, or hyphens. Values are not constrained.
 work_items:
   - keyword: "BIND"
     description: "choose superseding structure"
+    source: "SPEC-027 §5"
     metadata:
       x-contextos-seam: 4
-      x-contextos-source: "SPEC-027 §5"
 ```
 
 Validators MUST ignore every `metadata` entry whose key has this
@@ -193,14 +194,14 @@ sections: [string]       # optional section references
 **ProduceEntry:**
 ```yaml
 path: string             # output artifact path
-action: string           # "create" | "modify"
+action: string           # optional — "create" | "modify"
 ```
 
 **WorkItem:**
 ```yaml
 keyword: string          # one of the 10 defined keywords
 description: string      # the directive content
-source: string           # optional — origin reference
+source: string           # optional — origin section in a governing document
 metadata: object         # optional — namespaced extensions
 ```
 
@@ -209,6 +210,32 @@ metadata: object         # optional — namespaced extensions
 At least one of `produce` or `work_items` MUST be present.
 An envelope with neither is a validation failure — it
 instructs nothing.
+
+### 4.5 Field Constraints
+
+Each constraint is checked by exactly one rule (§7.1).
+
+| Field                          | Constraint                                   | Rule |
+|--------------------------------|----------------------------------------------|------|
+| `adp_version`                  | SemVer 2.0.0 with major version 1            | V-01, V-11 |
+| `dispatch.agent`               | Non-empty string                             | V-02 |
+| `dispatch.anchor`              | Non-empty array                              | V-03 |
+| `dispatch.anchor[]`            | Non-empty string                             | V-13 |
+| `dispatch.model`, `dispatch.gate`, `dispatch.branch` | String                 | V-13 |
+| `dispatch.tier`                | 1, 2 or 3                                    | V-10 |
+| `context.read`                 | Non-empty array                              | V-04 |
+| `context.read[]`               | `path` present, a non-empty string; `sections`, if present, an array of strings | V-13 |
+| `context.ignore`               | Array of strings                             | V-13 |
+| `produce` or `work_items`      | At least one present                         | V-07 |
+| `produce[]`                    | `path` present, a non-empty string; `action`, if present, `create` or `modify` | V-13 |
+| `work_items[].keyword`         | Present, one of the 10 keywords (§3.1–§3.4)  | V-08 |
+| `work_items[]`                 | `description` present, a non-empty string; `source`, if present, a string | V-13 |
+| `exit`                         | Non-empty array                              | V-05 |
+| `report`                       | Non-empty array                              | V-06 |
+| `exit[]`, `report[]`           | Non-empty string                             | V-13 |
+| `metadata`, at every level     | An object                                    | V-13 |
+| `metadata` keys                | The §3.5 form                                | V-12 |
+| Every §4 object                | No unknown field (§7.3)                      | V-09 |
 
 ---
 
@@ -257,7 +284,8 @@ Three values. Fixed.
 
 | Status     | Semantics                                    |
 |------------|----------------------------------------------|
-| `COMPLETE` | All EXIT conditions passed. Work done.       |
+| `COMPLETE` | All EXIT conditions passed. Work done. Every |
+|            | `exit_results[].result` MUST be `true`.      |
 | `BLOCKED`  | Agent cannot proceed. `items` MUST include   |
 |            | at least one entry with key `blocker`        |
 |            | describing what is missing.                  |
@@ -276,6 +304,27 @@ The report IS the handoff to the next agent. No separate
 chaining mechanism. The next agent's `context.read` includes
 the prior agent's report and/or produced artifacts.
 
+### 5.5 Field Constraints
+
+Each constraint is checked by exactly one rule (§7.2).
+
+| Field                          | Constraint                                   | Rule |
+|--------------------------------|----------------------------------------------|------|
+| `adp_version`                  | SemVer 2.0.0 with major version 1            | R-01, R-09 |
+| `report.agent`                 | Non-empty string                             | R-02 |
+| `report.anchor`                | Non-empty array                              | R-03 |
+| `report.anchor[]`              | Non-empty string                             | R-12 |
+| `report.status`                | `COMPLETE`, `BLOCKED` or `SURFACE`           | R-04 |
+| `exit_results`                 | Non-empty array                              | R-05 |
+| `exit_results[]`               | `condition` present, a non-empty string; `result` present, a boolean | R-12 |
+| `items`                        | Non-empty array                              | R-06 |
+| `items[]`                      | `key` present, a non-empty string; `value` present, a string, which may be empty | R-12 |
+| `metadata`                     | An object                                    | R-12 |
+| `metadata` keys                | The §3.5 form                                | R-11 |
+| Every §5 object                | No unknown field (§7.3)                      | R-10 |
+
+Status-dependent rules are R-07, R-08 and R-13 (§5.3).
+
 ---
 
 ## 6. Compression Tiers
@@ -288,7 +337,7 @@ grammar across all tiers — different density.
 ### Tier 1 — High Judgment (40–50% compression)
 
 Retains rationale, cross-references, tradeoff framing,
-SOURCE per work item. Agent makes irreversible decisions
+`source` per work item. Agent makes irreversible decisions
 that shape downstream work.
 
 Use when: the agent must choose between competing options
@@ -311,15 +360,19 @@ source. Pure imperative.
 Use when: the agent executes a shape already decided and
 tested. It needs coordinates, not cartography.
 
-### Tier Selection Guidance
+### Tier Selection Guidance (Informative)
 
 | Signal                                        | Tier |
 |-----------------------------------------------|------|
 | Work items contain BIND                       | 1    |
 | Work items contain only CONFIRM + PRODUCE     | 3    |
-| Work items mix BIND + CONFIRM                 | 2    |
 | Agent is expected to SURFACE findings         | 1–2  |
 | Agent executes against known passing criteria | 3    |
+
+When more than one signal applies, use the lowest tier number among
+them. A lower tier keeps more context, which is the safe side when the
+agent must use judgment. Validators check only that `dispatch.tier` is
+1, 2 or 3 (V-10). They do not check the tier against the work items.
 
 ---
 
@@ -342,11 +395,12 @@ A validator MUST reject a dispatch envelope that fails any rule in
 | V-05 | `exit` non-empty array                             |
 | V-06 | `report` non-empty array                           |
 | V-07 | At least one of `produce` or `work_items` present  |
-| V-08 | Every `work_items[].keyword` in defined vocabulary  |
+| V-08 | Every `work_items[].keyword` is one of the 10 keywords (§3.1–§3.4) |
 | V-09 | No unknown field in any §4 object (§7.3)           |
 | V-10 | `dispatch.tier` if present is 1, 2, or 3           |
 | V-11 | `adp_version` major version is 1 (§7.3)            |
 | V-12 | Every `metadata` key has the §3.5 form             |
+| V-13 | Field types and entry fields per §4.5              |
 
 ### 7.2 Report Validation Rules
 
@@ -363,6 +417,8 @@ A validator MUST reject a dispatch envelope that fails any rule in
 | R-09 | `adp_version` major version is 1 (§7.3)            |
 | R-10 | No unknown field in any §5 object (§7.3)           |
 | R-11 | Every `metadata` key has the §3.5 form             |
+| R-12 | Field types and entry fields per §5.5              |
+| R-13 | If status COMPLETE: every `exit_results[].result` is true |
 
 ### 7.3 Version Compatibility
 
@@ -379,20 +435,19 @@ For ADP-1 the only known major version is 1 (V-11, R-09).
 
 ## 8. Deduplication Rule
 
-A dispatch envelope MUST NOT carry content that is structurally
+A dispatch envelope SHOULD NOT carry content that is structurally
 available to the agent through its READ context. If a role
 boundary, commit format, or behavioral constraint exists in a
 document the agent is directed to READ, restating it in the
-dispatch is redundant and non-conformant.
+dispatch is redundant.
 
 Exception: EXIT conditions that tighten or specialize the
 agent's general contract for this specific dispatch ARE
 included. They are additive, not duplicative.
 
-Deduplication is a SHOULD for v1.0.0 (not mechanically
-enforced by the validator — requires semantic understanding
-of READ content). Future versions may introduce content-hash
-deduplication.
+Validators do not check this rule: checking it requires
+understanding the READ content. Future versions may introduce
+content-hash deduplication.
 
 ---
 
@@ -468,3 +523,11 @@ If 2.0.0 is ever needed, the original design was wrong.
 |            | a higher minor (§7.3); V-09 every level; new   |
 |            | V-12, R-10, R-11. ADP-A-005, resolves          |
 |            | ADP-D-003, ADP-D-006 and ADP-D-007.            |
+| 2026-11-17 | 1.1.1. SOURCE is the `source` field, not a     |
+|            | keyword (§3.4); field constraints (§4.5, §5.5)  |
+|            | checked by new V-13 and R-12; COMPLETE needs   |
+|            | every exit result true (§5.3, new R-13); tier  |
+|            | selection informative (§6); deduplication a    |
+|            | SHOULD NOT (§8). ADP-A-007, resolves ADP-D-001, |
+|            | ADP-D-002, ADP-D-008, ADP-D-010, ADP-D-013,    |
+|            | ADP-D-024 and ADP-D-025.                       |

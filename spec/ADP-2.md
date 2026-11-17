@@ -4,10 +4,10 @@
 |--------------|-----------------------------------------|
 | **ID**       | ADP-2                                   |
 | **Title**    | Dispatch Authority                      |
-| **Version**  | 2.0.0                                   |
+| **Version**  | 2.0.1                                   |
 | **Status**   | Draft                                   |
 | **License**  | Apache 2.0                              |
-| **Date**     | 2026-11-16                              |
+| **Date**     | 2026-11-17                              |
 
 ---
 
@@ -95,8 +95,8 @@ map to below.
 | *(no element)* | `AT-VERIFY`, `AT-VCS`, `AT-TOOL` | Cannot be inferred from an ADP-1 envelope: whether a condition needs anything run is not visible in it. Declared in the grant and enforced by the runtime (§6). |
 | *(no element)* | `AT-CODEBASE-CREATE`, `AT-CODEBASE-DELETE` | Never inferred from a dispatch. A codebase event is authorised only by a record (§4.3, G-9) and enforced by the runtime (§6). |
 
-`SOURCE` is left out. Whether it is a keyword is open as ADP-D-001 and
-ADP-D-002. Either way it implies nothing.
+`SOURCE` is not an ADP-1 keyword (ADP-1 §3.4). A work item's `source`
+field implies nothing.
 
 ---
 
@@ -281,3 +281,5 @@ human's view of the work.
 |            | validate_record (§4.3, §6); AT-VERIFY and       |
 |            | codebase events not inferred (§3); G-10.        |
 |            | ADP-A-006, resolves ADP-D-018 to ADP-D-022.     |
+| 2026-11-17 | 2.0.1. §3 note: `SOURCE` is not an ADP-1        |
+|            | keyword. ADP-A-007.                             |
