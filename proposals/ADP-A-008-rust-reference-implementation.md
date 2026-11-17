@@ -46,7 +46,7 @@ platform team wants to check every envelope before it reaches the agent.
 | Q4 | A contributor's PR breaks the validator | Nothing in CI builds Rust | The `implementation` job fails; once it is a required check, the PR cannot merge | A job that is not required: a red check can still be merged |
 | Q5 | The schema files change | `check_conformance.py` checks schemas against vectors | Unchanged. Schemas are normative and still need their own check. | Removing it: nothing checks the published schemas any more |
 | Q6 | A vector and the crate disagree | No implementation exists | The crate has a defect. The vector wins (ADP-0 §3.2). | Crate as Normative: two normative artifacts could disagree with no rule for which wins |
-| Q7 | The bank pins "ADP-1 1.1.1" in its policy | — | The crate's own version (0.1.0) says nothing about the spec. The README states which spec versions it implements. | Crate version = spec version: every crate bug fix would look like a spec change |
+| Q7 | ADP-1 1.2.0 adds rule V-14; a contributor implements it, and the bank's platform team depends on `adp = "0.1"` | No rule for which crate number follows a spec change | C2.1 bump table: crate minor (0.2.0). `Rule` is `#[non_exhaustive]`, so the new variant breaks no `match`. The crate CHANGELOG says "Implements: ADP-1 1.2.0" and lists V-14 under Changed, because more envelopes are now rejected. | Crate version mirrors the spec: no number left for a crate-only fix, and one number cannot mirror ADP-1 1.x and ADP-2 2.x at once |
 | Q8 | The bank asks for `pip install adp` or `npm install adp` | — | Out of scope. Later proposals, built on this crate. | In scope now: three build systems before the core is proven |
 
 ---
@@ -147,12 +147,69 @@ adp-protocol/
 | Input | `&serde_json::Value`. Any serialization (YAML, TOML, …) is parsed by the caller into the JSON data model. |
 | API, ADP-1 | `adp::v1::validate_dispatch(&Value) -> Verdict`, `adp::v1::validate_report(&Value) -> Verdict` |
 | API, ADP-2 | `adp::v2::validate(dispatch: &Value, grant_chain: &[Value]) -> Verdict`, `adp::v2::validate_grant(&Value) -> Verdict`, `adp::v2::validate_record(&Value) -> Verdict` |
-| Verdict | `Verdict { violations: Vec<Violation> }`, valid when empty. `Violation { rule: Rule, pointer: String, message: String }`. `Rule` is an enum: `V01`…`V13`, `R01`…`R13`, `G01`…`G10`. |
+| Verdict | `Verdict` with `is_valid()` and `violations() -> &[Violation]`. `Violation` with `rule() -> Rule`, `pointer() -> &str` (JSON Pointer, RFC 6901) and `message() -> &str`. `Rule` is an enum: `V01`…`V13`, `R01`…`R13`, `G01`…`G10`, with `Display` giving the spec id (`V-13`). Stability rules: C2.1(d). |
 | No regex, no glob crate | SemVer (ADP-1 §9) and paths and globs (ADP-2 §4.2) are hand-written from the spec text, so the behaviour is the spec's, not a library's |
 | Conformance test | `impl/rust/tests/conformance.rs` reads every file under `conformance/`. Per vector: verdict equals `expect`; on `fail`, the set of reported rules equals the vector's `rules`; `known_defect` handled as ADP-0 §5.6.4. |
 | Claims | A constant lists the documents the crate claims. The test runs only their vectors and fails if a claimed document has a vector the crate does not handle. |
-| Spec versions in code | `adp::v1::SPEC_VERSION = "1.1.1"`, `adp::v2::SPEC_VERSION = "2.0.1"`, so a program can check what it runs against |
-| Tags and release notes | Crate tags are `impl-rust/vX.Y.Z`, never `adp-N/…`. `CHANGELOG.md` gets its own **Rust implementation** table with an **Implements** column (e.g. `0.1.0` → ADP-1 1.1.1). README has a compatibility table: crate version → spec versions. |
+
+### C2.1 Crate versioning and releases
+
+The crate and the specs have separate version lines. The tables below
+fix how they relate, so a contributor never has to guess a number and a
+user can always tell which spec a crate release implements.
+
+**(a) Identity**
+
+| Item | Setting | Precedent |
+|------|---------|-----------|
+| crates.io name | `adp`; unclaimed when checked on 2026-11-18 | Publishing stays `publish = false` until Q8's later proposal |
+| Git tag | `adp-vX.Y.Z` (`{crate}-v{version}`), e.g. `adp-v0.1.0` | Default tag form of release-plz and cargo-release in multi-crate repositories. Cannot be confused with the spec tags `adp-1/v1.1.1`. |
+| Crate changelog | `impl/rust/CHANGELOG.md`, Keep a Changelog 1.1.0 sections (Added, Changed, Fixed, …), plus an **Implements** line per release | tokio, hyper and rustls each keep a changelog next to the crate |
+| Root `CHANGELOG.md` | Gains a **Rust implementation** table: crate version, date, Implements, link to the crate changelog | One entry point for readers who come from the spec |
+
+**(b) Spec → crate version map.** In the crate README and in the
+`lib.rs` crate docs (so docs.rs shows it), and as constants
+`adp::v1::SPEC_VERSION` and `adp::v2::SPEC_VERSION` (`&str`):
+
+| Crate | ADP-1 | ADP-2 | Stage |
+|-------|-------|-------|-------|
+| 0.1.0 | 1.1.1 | — | 1 |
+| 0.2.0 | 1.1.1 | 2.0.1 | 2 |
+
+**(c) Bump rule: spec change → crate change**
+
+| Spec change | Crate bump while 0.x | Crate bump from 1.0 | Why |
+|-------------|----------------------|---------------------|-----|
+| Erratum or editorial Patch, no new rule, no verdict change | patch | patch | Docs or behaviour fix only |
+| New rule (as V-13, R-13) or a verdict that tightens | minor | minor | `Rule` is `#[non_exhaustive]`, so a new variant breaks no caller's `match`. Rejecting more input is listed under **Changed**. |
+| Spec Minor (e.g. new optional field) | minor | minor | Additive |
+| Spec Major (e.g. ADP-2 3.0.0) | minor | **major** | New module `v3`; the old module is `#[deprecated]` for one minor release, then removed |
+| Crate API break, no spec change | minor | major | Plain SemVer for Rust APIs (Cargo treats 0.x minor as breaking) |
+| MSRV raised | minor | minor | Never in a patch release |
+
+**(d) Public API stability**
+
+- `Rule`, `Violation` and `Verdict` are `#[non_exhaustive]`; fields are
+  private behind accessors.
+- The only foreign type in the public API is `serde_json::Value` (the
+  input). A `serde_json` major bump is therefore a crate major bump.
+- `cargo-semver-checks` joins CI with the first published release
+  (Q8). Before that there is no public API to compare against.
+
+**(e) MSRV**
+
+- `rust-version = "1.85"`, the first release with edition 2024.
+- CI tests MSRV 1.85.0 and the pinned toolchain 1.99.0 (C3).
+
+**(f) Release checklist**, in `impl/rust/RELEASING.md`:
+
+1. Bump `version` in `Cargo.toml`; update `Cargo.lock`.
+2. Add the `impl/rust/CHANGELOG.md` entry with its **Implements** line,
+   and the row in the root `CHANGELOG.md`.
+3. Update the version map (b) in the README and `lib.rs`.
+4. Open the PR; the maintainer merges.
+5. Tag the merge commit `adp-vX.Y.Z`, push the tag by name, publish a
+   GitHub pre-release with the changelog entry.
 
 ### C3: `.github/workflows/adp.yml`
 
@@ -171,6 +228,11 @@ New job `implementation` on `ubuntu-24.04`:
       - run: cargo fmt --check
       - run: cargo clippy --locked --all-targets -- -D warnings
       - run: cargo test --locked
+      - run: cargo doc --locked --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+      - run: rustup toolchain install 1.85.0 --profile minimal
+      - run: cargo +1.85.0 test --locked   # MSRV, C2.1(e)
 ```
 
 No third-party action: `rustup` is on the runner image.
@@ -243,7 +305,7 @@ vector is never edited to fit the crate.
 | Q4 | Make `implementation` a required status check? | **Yes, after stage 1 merges.** The maintainer adds it to `adp-ruleset` (a settings change, so the maintainer does it). Until then it runs but cannot block. | Accepted as sensible default (2026-11-17). | Settled as drafted. |
 | Q5 | What happens to the Python CI scripts? | **Keep them.** `check_conformance.py` is the only check of the published schemas; the others check the register and commits. Porting them is a separate proposal if wanted (A7). | Accepted as sensible default (2026-11-17). | Settled as drafted. |
 | Q6 | Class of `impl/`? | **New class Implementation: not binding, must pass every claimed vector.** (A4, A5 rejected.) | Accepted as sensible default (2026-11-17). | Settled as drafted. |
-| Q7 | Versions? | **ADP-0 1.2.0 (Minor). Crate starts at 0.1.0, independent of spec versions. To avoid confusion: crate tags `impl-rust/vX.Y.Z`; `SPEC_VERSION` constants in code; a README compatibility table and a CHANGELOG "Implements" column map each crate version to the spec versions it implements.** One crate implements two specs (1.1.1 and 2.0.1), so one number cannot mirror both; crate bug fixes need their own number. | Pending: maintainer asked whether two version styles confuse users (2026-11-17). | Clarity measures added to C2 and this row. |
+| Q7 | Versions? | **ADP-0 1.2.0 (Minor). Crate `adp` starts at 0.1.0 on its own SemVer line, tied to the specs by C2.1: tags `adp-vX.Y.Z`, a spec → crate version map in README, docs.rs and `SPEC_VERSION` constants, a bump table for every kind of spec change, `#[non_exhaustive]` public types, and a stated MSRV policy.** One crate implements two specs (1.1.1 and 2.0.1), so one number cannot mirror both, and crate-only fixes need their own number. | Accepted as sensible default (2026-11-17), with the crate versioning made explicit (C2.1) at the maintainer's request (2026-11-18). | C2.1 added; C3 gains doc and MSRV steps. |
 | Q8 | Publishing and bindings (crates.io, Python, WASM, C)? | **Out of scope.** `publish = false`. Each later, as its own proposal, once the core passes every vector. | Accepted as sensible default (2026-11-17). | Settled as drafted. |
 
 ---
@@ -259,15 +321,19 @@ vector is never edited to fit the crate.
 4. **IMPLEMENTATION:** C2 with ADP-1 only and C3:
    `feat(impl): add the Rust reference validator for ADP-1 — ADP-A-008`,
    `feat(ci): run the reference implementation against the vectors — ADP-A-008`.
-5. **INFORMATIVE:** C4 and a `CHANGELOG.md` row:
+   The crate commit includes `impl/rust/CHANGELOG.md` (0.1.0,
+   Implements: ADP-1 1.1.1) and `impl/rust/RELEASING.md` (C2.1).
+5. **INFORMATIVE:** C4 and the root `CHANGELOG.md` rows:
    `docs(readme): point to the Rust reference implementation — ADP-A-008`.
 6. **REGISTER:** none.
 
-After merge: tag `adp-0/v1.2.0` and its pre-release Release.
+After merge: tags `adp-0/v1.2.0` and `adp-v0.1.0`, each with its
+pre-release Release.
 
-**Stage 2 (one PR):** C2 for ADP-2:
+**Stage 2 (one PR):** C2 for ADP-2, crate 0.2.0 (Implements: ADP-1
+1.1.1, ADP-2 2.0.1):
 `feat(impl): add ADP-2 authority, grant and record validation — ADP-A-008`,
-and the README claim and `CHANGELOG.md` row.
+with the version map, both changelogs, and tag `adp-v0.2.0` after merge.
 
 ---
 
