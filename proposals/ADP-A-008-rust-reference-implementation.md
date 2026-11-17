@@ -151,6 +151,8 @@ adp-protocol/
 | No regex, no glob crate | SemVer (ADP-1 §9) and paths and globs (ADP-2 §4.2) are hand-written from the spec text, so the behaviour is the spec's, not a library's |
 | Conformance test | `impl/rust/tests/conformance.rs` reads every file under `conformance/`. Per vector: verdict equals `expect`; on `fail`, the set of reported rules equals the vector's `rules`; `known_defect` handled as ADP-0 §5.6.4. |
 | Claims | A constant lists the documents the crate claims. The test runs only their vectors and fails if a claimed document has a vector the crate does not handle. |
+| Spec versions in code | `adp::v1::SPEC_VERSION = "1.1.1"`, `adp::v2::SPEC_VERSION = "2.0.1"`, so a program can check what it runs against |
+| Tags and release notes | Crate tags are `impl-rust/vX.Y.Z`, never `adp-N/…`. `CHANGELOG.md` gets its own **Rust implementation** table with an **Implements** column (e.g. `0.1.0` → ADP-1 1.1.1). README has a compatibility table: crate version → spec versions. |
 
 ### C3: `.github/workflows/adp.yml`
 
@@ -235,14 +237,14 @@ vector is never edited to fit the crate.
 
 | # | Question | Recommendation (setting and reason) | Maintainer answer | Effect on this draft |
 |---|----------|-------------------------------------|-------------------|----------------------|
-| Q1 | Language and location? | **Rust, one crate `adp` at `impl/rust/`.** Compiled, embeddable, one core for later bindings; keeps Cargo files out of the repo root (A1, A2, A6 rejected). | | |
-| Q2 | What must the crate match on a vector? | **Verdict and rule.** On a `fail` vector the reported rules equal the vector's `rules`. A validator that rejects for the wrong reason is not conformant in any useful sense. | | |
-| Q3 | One application PR or staged? | **Two stages.** Stage 1: ADP-0 text, crate with ADP-1 (68 vectors), CI job, README. Stage 2: ADP-2 (33 vectors), README claim updated. Each stage reviewable on its own. | | |
-| Q4 | Make `implementation` a required status check? | **Yes, after stage 1 merges.** The maintainer adds it to `adp-ruleset` (a settings change, so the maintainer does it). Until then it runs but cannot block. | | |
-| Q5 | What happens to the Python CI scripts? | **Keep them.** `check_conformance.py` is the only check of the published schemas; the others check the register and commits. Porting them is a separate proposal if wanted (A7). | | |
-| Q6 | Class of `impl/`? | **New class Implementation: not binding, must pass every claimed vector.** (A4, A5 rejected.) | | |
-| Q7 | Versions? | **ADP-0 1.2.0 (Minor). Crate starts at 0.1.0, independent of spec versions; the README states which spec versions it claims.** | | |
-| Q8 | Publishing and bindings (crates.io, Python, WASM, C)? | **Out of scope.** `publish = false`. Each later, as its own proposal, once the core passes every vector. | | |
+| Q1 | Language and location? | **Rust, one crate `adp` at `impl/rust/`.** Compiled, embeddable, one core for later bindings; keeps Cargo files out of the repo root (A1, A2, A6 rejected). | Accepted as sensible default (2026-11-17). | Settled as drafted. |
+| Q2 | What must the crate match on a vector? | **Verdict and rule.** On a `fail` vector the reported rules equal the vector's `rules`. A validator that rejects for the wrong reason is not conformant in any useful sense. | Accepted as sensible default (2026-11-17). | Settled as drafted. |
+| Q3 | One application PR or staged? | **Two stages.** Stage 1: ADP-0 text, crate with ADP-1 (68 vectors), CI job, README. Stage 2: ADP-2 (33 vectors), README claim updated. Each stage reviewable on its own. | Accepted as sensible default (2026-11-17). | Settled as drafted. |
+| Q4 | Make `implementation` a required status check? | **Yes, after stage 1 merges.** The maintainer adds it to `adp-ruleset` (a settings change, so the maintainer does it). Until then it runs but cannot block. | Accepted as sensible default (2026-11-17). | Settled as drafted. |
+| Q5 | What happens to the Python CI scripts? | **Keep them.** `check_conformance.py` is the only check of the published schemas; the others check the register and commits. Porting them is a separate proposal if wanted (A7). | Accepted as sensible default (2026-11-17). | Settled as drafted. |
+| Q6 | Class of `impl/`? | **New class Implementation: not binding, must pass every claimed vector.** (A4, A5 rejected.) | Accepted as sensible default (2026-11-17). | Settled as drafted. |
+| Q7 | Versions? | **ADP-0 1.2.0 (Minor). Crate starts at 0.1.0, independent of spec versions. To avoid confusion: crate tags `impl-rust/vX.Y.Z`; `SPEC_VERSION` constants in code; a README compatibility table and a CHANGELOG "Implements" column map each crate version to the spec versions it implements.** One crate implements two specs (1.1.1 and 2.0.1), so one number cannot mirror both; crate bug fixes need their own number. | Pending: maintainer asked whether two version styles confuse users (2026-11-17). | Clarity measures added to C2 and this row. |
+| Q8 | Publishing and bindings (crates.io, Python, WASM, C)? | **Out of scope.** `publish = false`. Each later, as its own proposal, once the core passes every vector. | Accepted as sensible default (2026-11-17). | Settled as drafted. |
 
 ---
 
