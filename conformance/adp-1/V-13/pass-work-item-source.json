@@ -1,0 +1,42 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.1.1",
+    "kind": "dispatch"
+  },
+  "rules": [
+    "V-13"
+  ],
+  "expect": "pass",
+  "description": "Work item carries its origin in the source field, a string (§3.4, §4.5).",
+  "input": {
+    "adp_version": "1.0.0",
+    "dispatch": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ]
+    },
+    "context": {
+      "read": [
+        {
+          "path": "docs/spec.md"
+        }
+      ]
+    },
+    "work_items": [
+      {
+        "keyword": "PRODUCE",
+        "description": "write module",
+        "source": "SPEC-001 §2"
+      }
+    ],
+    "exit": [
+      "tests pass"
+    ],
+    "report": [
+      "commit_hash"
+    ]
+  }
+}

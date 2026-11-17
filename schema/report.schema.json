@@ -88,6 +88,11 @@
           }
         }
       }
+    },
+    {
+      "$comment": "R-13: a COMPLETE report has no failed exit result (ADP-1 §5.3).",
+      "if": { "properties": { "report": { "properties": { "status": { "const": "COMPLETE" } } } } },
+      "then": { "properties": { "exit_results": { "items": { "properties": { "result": { "const": true } } } } } }
     }
   ],
   "$defs": {

@@ -1,0 +1,39 @@
+{
+  "adp_conformance": "1",
+  "target": {
+    "doc": "ADP-1",
+    "since": "1.1.1",
+    "kind": "report"
+  },
+  "rules": [
+    "R-13"
+  ],
+  "expect": "fail",
+  "description": "COMPLETE report with a second exit result that failed (§5.3).",
+  "input": {
+    "adp_version": "1.0.0",
+    "report": {
+      "agent": "impl-agent",
+      "anchor": [
+        "SPEC-001"
+      ],
+      "status": "COMPLETE"
+    },
+    "exit_results": [
+      {
+        "condition": "tests pass",
+        "result": true
+      },
+      {
+        "condition": "lint clean",
+        "result": false
+      }
+    ],
+    "items": [
+      {
+        "key": "commit_hash",
+        "value": "abc"
+      }
+    ]
+  }
+}
