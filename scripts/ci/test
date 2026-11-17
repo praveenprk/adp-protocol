@@ -41,8 +41,8 @@ f=$(copy same)
 f_sev=$(copy sev);       sed -i.bak '/^### ADP-D-005$/,/^Severity/s/^Severity    : HIGH/Severity    : LOW/' "$f_sev"
 f_ev=$(copy ev);         sed -i.bak 's/harness: `major-2` → True/harness: `major-2` → False/' "$f_ev"
 f_del=$(copy del);       sed -i.bak 's/^### ADP-D-017$/### gone/' "$f_del"
-f_status=$(copy status); sed -i.bak '/^### ADP-D-001$/,/^Status/s/^Status      : OPEN/Status      : RESOLVED/' "$f_status"
-f_badst=$(copy badst);   sed -i.bak '/^### ADP-D-001$/,/^Status/s/^Status      : OPEN/Status      : FIXED/' "$f_badst"
+f_status=$(copy status); sed -i.bak '/^### ADP-D-001$/,/^Status/s/^Status      : .*/Status      : WONTFIX/' "$f_status"
+f_badst=$(copy badst);   sed -i.bak '/^### ADP-D-001$/,/^Status/s/^Status      : .*/Status      : FIXED/' "$f_badst"
 # IDs relative to the register's last entry, so filing a defect never
 # turns a case into a duplicate-ID refusal.
 last=$(sed -n 's/^### ADP-D-\([0-9][0-9]*\)$/\1/p' DEFECTS.md | tail -n 1)
