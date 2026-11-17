@@ -92,6 +92,8 @@ adp-protocol/
 
 Pre-release. Spec finalized. Schema and reference implementation in progress.
 
+Release notes for every version: [CHANGELOG.md](CHANGELOG.md).
+
 ## License
 
 Apache 2.0
