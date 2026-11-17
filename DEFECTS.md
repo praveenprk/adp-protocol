@@ -79,8 +79,8 @@ Evidence    : At 49bf19f6297e3bbf3d694dc49e7758080e255ee9:
               harness: `spec-keyword-rows` → 11 keywords, incl. SOURCE
               harness: `keyword-enum-size` → 10
 Severity    : HIGH
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-007, 5c59a8c
 Notes       : Internal contradiction (ADP-0 §3.2 rule 2). No
               artifact takes precedence. Shares root with ADP-D-002.
 
@@ -97,8 +97,8 @@ Evidence    : At 49bf19f6297e3bbf3d694dc49e7758080e255ee9:
               `grep -nE 'SOURCE. +\||^source: string|x-contextos-source' spec/ADP-1.md`
               → lines 103, 120, 186
 Severity    : HIGH
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-007, 5c59a8c
 Notes       : Internal contradiction: one concept, three
               representations with no stated relationship.
 
@@ -212,8 +212,8 @@ Evidence    : At 49bf19f6297e3bbf3d694dc49e7758080e255ee9:
               `grep -n 'COMPLETE' spec/ADP-1.md` → lines 210, 237, 330
               harness: `complete-failed-exit` → True
 Severity    : HIGH
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-007, 5c59a8c
 Notes       : Departs from the CRITICAL row: §5.3 states the
               semantics declaratively, without an RFC 2119 keyword,
               and the binding strength of the validation tables is
@@ -258,8 +258,8 @@ Does        : Line 297: "Work items mix BIND + CONFIRM → 2". Any
 Evidence    : At 49bf19f6297e3bbf3d694dc49e7758080e255ee9:
               `grep -nE '^\| Work items (contain BIND|mix BIND)' spec/ADP-1.md` → lines 295, 297
 Severity    : HIGH
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-007, 5c59a8c
 Notes       : Internal contradiction. The section is normative by
               default (ADP-0 §3.1): "Guidance" in its title does not
               make it informative.
@@ -311,8 +311,8 @@ Does        : The tier 3 example (line 6 `tier: 3`) carries a BIND
 Evidence    : At 49bf19f6297e3bbf3d694dc49e7758080e255ee9:
               `grep -nE 'tier: 3|keyword: "BIND"' examples/tier3-impl.yaml` → lines 6, 29
 Severity    : LOW
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-007, 2d5f8b3
 Notes       : Depends on ADP-D-010: which tier rule governs is
               itself contradictory.
 
@@ -521,8 +521,8 @@ Evidence    : At 12e644b:
               The minimal valid dispatch vector with
               `produce: [{"action": "create"}]` → schema verdict False.
 Severity    : HIGH
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-007, 5c59a8c
 Notes       : Departs from the CRITICAL row: ADP-1 does not say
               whether such envelopes are conformant, so neither
               verdict can be shown wrong. ADP-A-001 A5 and ADP-A-005
@@ -539,6 +539,6 @@ Does        : Line 392: "Deduplication is a SHOULD for v1.0.0 (not
 Evidence    : At 12e644b:
               `grep -n "MUST NOT carry\|Deduplication is a SHOULD" spec/ADP-1.md` → lines 382, 392
 Severity    : HIGH
-Status      : OPEN
-Resolved by : —
+Status      : RESOLVED
+Resolved by : ADP-A-007, 5c59a8c
 Notes       : Internal contradiction in normative text.
